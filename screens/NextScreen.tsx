@@ -21,10 +21,17 @@ const DATA = [
 function HotMain({ navigation }: { navigation: any }) {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showItem, setShowItem] = useState(false);
+  const [showItemID, setShowItemID] = useState('');
 
   const renderItem = (item: any) => {
     return (
-      <TouchableOpacity style={styles.itemBlock}>
+      <TouchableOpacity
+        onPress={() => {
+          setShowItemID(item.item.id);
+          setShowItem(true);
+        }}
+        style={styles.itemBlock}>
         <View style={styles.itemTouch}>
           <Image
             source={{ uri: "https://i.imgur.com/I7zVE7v.jpeg" }}
@@ -74,59 +81,72 @@ function HotMain({ navigation }: { navigation: any }) {
 
 
   return (
-    <View style={{ backgroundColor: '#71D0DA', flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
-      <View style={styles.topBlock}>
-        <TouchableOpacity
-          onPress={() => { navigation.openDrawer() }}
-          style={styles.topButton}>
-          <Image
-            style={[{
-              height: 40,
-              width: 40,
-              resizeMode: 'contain',
-              opacity: 1
-            }]}
-            source={require('../assets/openmenu.png')}
-          />
-        </TouchableOpacity>
-        <View style={styles.textInputBG}>
-          <TextInput
-            style={styles.input}
-            onChangeText={setSearchQuery}
-            value={searchQuery}
-            placeholder="搜尋"
+    showItem
+      ?//Item Snapshot
+      <View style={{ backgroundColor: '#71D0DA', flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
+        <View style={styles.topContainer}>
+          <TouchableOpacity style={styles.backButton} onPress={() => setShowItem(false)}>
+            <Image
+              style={[styles.backButton, { resizeMode: 'contain' }]}
+              source={require('../assets/backarrow.png')} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      ://Main
+      <View style={{ backgroundColor: '#71D0DA', flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
+        <View style={styles.topBlock}>
+          <TouchableOpacity
+            onPress={() => { navigation.openDrawer() }}
+            style={styles.topButton}>
+            <Image
+              style={[{
+                height: 40,
+                width: 40,
+                resizeMode: 'contain',
+                opacity: 1
+              }]}
+              source={require('../assets/openmenu.png')}
+            />
+          </TouchableOpacity>
+          <View style={styles.textInputBG}>
+            <TextInput
+              style={styles.input}
+              onChangeText={setSearchQuery}
+              value={searchQuery}
+              placeholder="搜尋"
+            />
+          </View>
+          <TouchableOpacity
+            onPress={() => { }}
+            style={styles.topButton}>
+            <Image
+              style={[{
+                height: 40,
+                width: 40,
+                resizeMode: 'contain',
+                opacity: 1
+              }]}
+              source={require('../assets/search.png')}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.flatList}>
+          <FlatList
+            data={DATA}
+            columnWrapperStyle={styles.row}
+            renderItem={renderItem}
+            horizontal={false}
+            numColumns={2}
+            contentContainerStyle={{
+              paddingBottom: 120
+            }}
           />
         </View>
-        <TouchableOpacity
-          onPress={() => { }}
-          style={styles.topButton}>
-          <Image
-            style={[{
-              height: 40,
-              width: 40,
-              resizeMode: 'contain',
-              opacity: 1
-            }]}
-            source={require('../assets/search.png')}
-          />
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.flatList}>
-        <FlatList
-          data={DATA}
-          columnWrapperStyle={styles.row}
-          renderItem={renderItem}
-          horizontal={false}
-          numColumns={2}
-          contentContainerStyle={{
-            paddingBottom: 120
-          }}
-        />
+        <Button title="Hotmain" onPress={() => navigation.goBack()}></Button>
       </View>
-
-      <Button title="Hotmain" onPress={() => navigation.goBack()}></Button>
-    </View>
   )
 }
 
@@ -328,6 +348,20 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 15,
     fontWeight: '600',
-  }
+  },
+  topContainer: {
+    width: '90%',
+    height: '10%',
+    marginTop: '10%',
+    display: 'flex',
+    justifyContent: 'center',
+    //backgroundColor: 'red'
+  },
+  backButton: {
+    width: 50,
+    height: 50,
+    //resizeMode: 'contain',
+    display: 'flex'
+  },
 
 })

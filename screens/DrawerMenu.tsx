@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, } from 'react-native';
 
 import {
   DrawerContent,
@@ -16,9 +16,11 @@ import {
   Text,
   TouchableRipple
 } from 'react-native-paper'
-//images
+import { useState } from 'react';
 
 export function DrawerMenu(props: any) {
+
+  const [currPage, setCurrPage] = useState('hotmain');
 
   return (
     <View style={{ flex: 1, backgroundColor: '#DE75BE' }}>
@@ -58,7 +60,7 @@ export function DrawerMenu(props: any) {
 
             <View style={styles.drawerSection}>
               <DrawerItem
-                style={styles.drawerTab}
+                style={[styles.drawerTab, currPage == 'hotmain' ? styles.currTab : {}]}
                 label={() => (
                   <View style={styles.drawerTabView}>
                     <Text style={styles.drawerTabText}>
@@ -66,10 +68,10 @@ export function DrawerMenu(props: any) {
                     </Text>
                   </View>
                 )}
-                onPress={() => { props.navigation.navigate('Home') }}
+                onPress={() => { setCurrPage('hotmain'); props.navigation.navigate('Home') }}
               />
               <DrawerItem
-                style={[styles.drawerTab]}
+                style={[styles.drawerTab, currPage == 'favs' ? styles.currTab : {}]}
                 label={() => (
                   <View style={styles.drawerTabView}>
                     <Text style={styles.drawerTabText}>
@@ -77,10 +79,10 @@ export function DrawerMenu(props: any) {
                     </Text>
                   </View>
                 )}
-                onPress={() => { props.navigation.navigate('Fav') }}
+                onPress={() => { setCurrPage('favs'); props.navigation.navigate('Fav') }}
               />
               <DrawerItem
-                style={styles.drawerTab}
+                style={[styles.drawerTab, currPage == 'hist' ? styles.currTab : {}]}
                 label={() => (
                   <View style={styles.drawerTabView}>
                     <Text style={styles.drawerTabText}>
@@ -88,10 +90,10 @@ export function DrawerMenu(props: any) {
                     </Text>
                   </View>
                 )}
-                onPress={() => { props.navigation.navigate('History') }}
+                onPress={() => { setCurrPage('hist'); props.navigation.navigate('History') }}
               />
               <DrawerItem
-                style={styles.drawerTab}
+                style={[styles.drawerTab, currPage == 'wish' ? styles.currTab : {}]}
                 label={() => (
                   <View style={styles.drawerTabView}>
                     <Text style={styles.drawerTabText}>
@@ -99,7 +101,7 @@ export function DrawerMenu(props: any) {
                     </Text>
                   </View>
                 )}
-                onPress={() => { props.navigation.navigate('Wish') }}
+                onPress={() => { setCurrPage('wish'); props.navigation.navigate('Wish') }}
               />
 
 
@@ -201,5 +203,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
     padding: 0
+  },
+  currTab: {
+    backgroundColor: '#B184CF'
   }
 });
