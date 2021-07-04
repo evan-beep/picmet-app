@@ -1,10 +1,12 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, TextInput, Image, FlatList } from 'react-native';
+import { View, Button, TouchableOpacity, StyleSheet, TextInput, Image, FlatList } from 'react-native';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
-import { DrawerMenu } from './DrawerMenu';
+import { DrawerMenu, } from './DrawerMenu';
+
+import { Modal, Portal, Provider, Text } from 'react-native-paper';
 
 const Drawer = createDrawerNavigator();
 
@@ -19,18 +21,15 @@ const DATA = [
 
 
 function HotMain({ navigation }: { navigation: any }) {
-
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
+  const [visible, setVisible] = React.useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [showItem, setShowItem] = useState(false);
-  const [showItemID, setShowItemID] = useState('');
 
   const renderItem = (item: any) => {
     return (
       <TouchableOpacity
-        onPress={() => {
-          setShowItemID(item.item.id);
-          setShowItem(true);
-        }}
+        onPress={showModal}
         style={styles.itemBlock}>
         <View style={styles.itemTouch}>
           <Image
@@ -79,21 +78,22 @@ function HotMain({ navigation }: { navigation: any }) {
 
   }
 
-
-  return (
-    showItem
-      ?//Item Snapshot
+  function itemModal() {
+    return (
       <View style={{ backgroundColor: '#71D0DA', flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
         <View style={styles.topContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={() => setShowItem(false)}>
+          <TouchableOpacity style={styles.backButton} onPress={() => { console.log('are you there') }}>
             <Image
               style={[styles.backButton, { resizeMode: 'contain' }]}
               source={require('../assets/backarrow.png')} />
           </TouchableOpacity>
         </View>
-      </View>
+      </View>)
+  }
 
-      ://Main
+
+  return (
+    <Provider>
       <View style={{ backgroundColor: '#71D0DA', flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
         <View style={styles.topBlock}>
           <TouchableOpacity
@@ -145,8 +145,19 @@ function HotMain({ navigation }: { navigation: any }) {
           />
         </View>
 
-        <Button title="Hotmain" onPress={() => navigation.goBack()}></Button>
+        <Portal>
+          <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{ height: '110%', width: '110%', backgroundColor: '#DE75BE', alignItems: 'center', justifyContent: 'flex-start' }}>
+            <View style={styles.topContainer}>
+              <TouchableOpacity style={styles.backButton} onPress={hideModal}>
+                <Image
+                  style={[styles.backButton, { resizeMode: 'contain' }]}
+                  source={require('../assets/backarrow.png')} />
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        </Portal>
       </View>
+    </Provider>
   )
 }
 
@@ -363,5 +374,10 @@ const styles = StyleSheet.create({
     //resizeMode: 'contain',
     display: 'flex'
   },
+  itemModal: {
+    backgroundColor: '#DE75BE',
+    width: '110%',
+    height: '110%'
+  }
 
 })
