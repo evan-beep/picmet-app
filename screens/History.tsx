@@ -1,18 +1,9 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { View, Button, TouchableOpacity, StyleSheet, TextInput, Image, FlatList, Platform, KeyboardAvoidingView } from 'react-native';
-
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
-import { DrawerMenu, } from './DrawerMenu';
-
 import { Modal, Portal, Provider, Text } from 'react-native-paper';
 
-import History from './History'
-import Favourites from './Favourites';
-import WishNotes from './WishNotes';
 
-const Drawer = createDrawerNavigator();
 
 const DATA = [
   { id: 1, name: 'kajhdas', likes: '121', dislikes: '3', comments: '10', imageURL: "https://i.imgur.com/I7zVE7v.jpeg" },
@@ -25,7 +16,6 @@ const DATA = [
 
 ];
 
-
 const COMMENTS = [
   { id: 1, userID: 'player1', itemID: 'kke', content: 'kajhdas', likes: '121', dislikes: '3', comments: '10', imageURL: "https://i.imgur.com/I7zVE7v.jpeg" },
   { id: 2, userID: 'player2', itemID: 'kke', content: 'bruh', likes: '122', dislikes: '3', comments: '10', imageURL: '../assets/london.png' },
@@ -36,7 +26,7 @@ const COMMENTS = [
 ];
 
 
-function HotMain({ navigation }: { navigation: any }) {
+export default function History({ navigation }: { navigation: any }) {
   const showModal = (item: any) => {
     setCurrItem(item.item.name)
     setVisible(true);
@@ -51,7 +41,8 @@ function HotMain({ navigation }: { navigation: any }) {
     )
   }
 
-  function addToFavourite() {
+
+  function removeFromFavourites() {
 
   }
 
@@ -125,7 +116,7 @@ function HotMain({ navigation }: { navigation: any }) {
             {currItem}
           </Text>
         </View>
-        <TouchableOpacity onPress={addToFavourite} style={{ marginTop: 15, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <TouchableOpacity onPress={removeFromFavourites} style={{ marginTop: 15, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ width: '80%', height: 50, backgroundColor: '#7CAEDE', borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ color: 'white', fontSize: 20, fontWeight: '600' }}>添加至我的最愛</Text>
           </View>
@@ -140,6 +131,13 @@ function HotMain({ navigation }: { navigation: any }) {
     )
   }
 
+  const mainHeader = () => {
+    return (
+      <Text style={{ fontSize: 30, color: 'white', fontWeight: '800', width: '50%' }}>
+        瀏覽紀錄
+      </Text>
+    )
+  }
 
   const CommentContainer = (item: any) => {
     return (
@@ -194,14 +192,6 @@ function HotMain({ navigation }: { navigation: any }) {
     )
   }
 
-  const mainHeader = () => {
-    return (
-      <Text style={{ fontSize: 30, color: 'white', fontWeight: '800', width: '50%' }}>
-        熱門商品
-      </Text>
-    )
-  }
-
 
   return (
     <Provider>
@@ -247,9 +237,9 @@ function HotMain({ navigation }: { navigation: any }) {
           <FlatList
             data={DATA}
             keyExtractor={item => item.id.toString()}
+            columnWrapperStyle={styles.row}
             ListHeaderComponent={mainHeader}
             ListHeaderComponentStyle={{ width: '90%', height: 60, alignItems: 'flex-start', justifyContent: 'center' }}
-            columnWrapperStyle={styles.row}
             renderItem={renderItem}
             horizontal={false}
             numColumns={2}
@@ -311,17 +301,7 @@ function HotMain({ navigation }: { navigation: any }) {
   )
 }
 
-export default function MainProductPage({ navigation }: { navigation: any }) {
-  return (
-    <Drawer.Navigator initialRouteName="Home" drawerContent={props => <DrawerMenu {...props} />}>
-      <Drawer.Screen name="Home" component={HotMain} />
-      <Drawer.Screen name="History" component={History} />
-      <Drawer.Screen name="Fav" component={Favourites} />
-      <Drawer.Screen name="Wish" component={WishNotes} />
 
-    </Drawer.Navigator>
-  )
-}
 
 
 const styles = StyleSheet.create({
