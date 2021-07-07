@@ -90,6 +90,7 @@ function HotMain({ navigation }: { navigation: any }) {
   };
   const hideModal = () => setVisible(false);
   const [visible, setVisible] = React.useState(false);
+  const [is_favorite, setIs_favorite] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currItem, setCurrItem] = React.useState(null);
 
@@ -171,6 +172,16 @@ function HotMain({ navigation }: { navigation: any }) {
                     snapshot.forEach(function(childSnapshot){
                       var childData = childSnapshot.val();
                       if(childData.email == user_email){
+                        let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
+                        user_favorite_list.once('value').then(function(s){
+                          s.forEach(function(c){
+                            let itemID = c.val().itemID;
+                            if(itemID == item.item.id){
+                              console.log('user_list/' + childSnapshot.key + "/favorite_list/" + c.key);
+                              setIs_favorite(true);
+                            }
+                          })
+                        })
                         let user_history_list = firebase.database().ref('user_list/' + childSnapshot.key + "/history_list");
                         user_history_list.once('value').then(function(s){
                           s.forEach(function(c){
@@ -511,7 +522,9 @@ function HotMain({ navigation }: { navigation: any }) {
                     />
                   </View>
                   <TouchableOpacity
-                    onPress={() => { }}
+                    onPress={() => {
+                      
+                    }}
                     style={{ width: 40, height: 40, marginTop: 20 }}>
                     <Image
                       style={{ width: 40, height: 40, resizeMode: 'contain' }}
