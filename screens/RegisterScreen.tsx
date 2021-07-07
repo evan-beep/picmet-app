@@ -2,6 +2,32 @@ import * as React from 'react';
 import { useState } from 'react';
 import { View, Text, Button, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import firebase from 'firebase/app'
+
+// Optionally import the services that you want to use
+import "firebase/auth";
+import "firebase/database";
+//import "firebase/firestore";
+//import "firebase/functions";
+import "firebase/storage";
+
+// Initialize Firebase
+var firebaseConfig = {
+  apiKey: "AIzaSyC4sYfz1pRXlf1AobgQ69aDMzw3F3imGQo",
+  authDomain: "picmet-app.firebaseapp.com",
+  databaseURL: "https://picmet-app-default-rtdb.firebaseio.com",
+  projectId: "picmet-app",
+  storageBucket: "picmet-app.appspot.com",
+  messagingSenderId: "1040692554774",
+  appId: "1:1040692554774:web:ae603f95751b34ae465937",
+  measurementId: "G-8RNR9L5QHF"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app(); // if already initialized, use that one
+}
 
 export default function RegisterScreen({ navigation }: { navigation: any }) {
 
@@ -30,6 +56,12 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
   };
 
   function register(u: string, e: string, p: string) {
+    firebase.auth().createUserWithEmailAndPassword(e, p).catch(function (error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+    });
+
     navigation.navigate('Main');
 
   }
