@@ -27,6 +27,7 @@ const COMMENTS = [
 
 
 export default function History({ navigation }: { navigation: any }) {
+  //
   const showModal = (item: any) => {
     setCurrItem(item.item.name)
     setVisible(true);

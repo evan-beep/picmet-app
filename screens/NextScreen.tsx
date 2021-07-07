@@ -37,6 +37,7 @@ const COMMENTS = [
 
 
 function HotMain({ navigation }: { navigation: any }) {
+  //
   const showModal = (item: any) => {
     setCurrItem(item.item.name)
     setVisible(true);
