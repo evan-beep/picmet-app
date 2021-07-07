@@ -35,15 +35,15 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
 
   function login(e: string, p: string) {
     firebase.auth().signInWithEmailAndPassword(e, p)
-    .then(function(){
-      navigation.navigate('Main');
-    })
-    .catch(function (error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      Alert.alert("error", errorMessage);
-    });
+      .then(function () {
+        navigation.navigate('Main');
+      })
+      .catch(function (error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        Alert.alert("error", errorMessage);
+      });
   }
 
   function togglePassVisible() {
@@ -128,10 +128,22 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
           alignItems: 'center'
         }]}>
           <TouchableOpacity style={styles.socialMediaButton}>
-
+            <Image
+              source={require('../assets/googleicon.png')}
+              style={{
+                width: '100%',
+                height: '100%',
+                resizeMode: 'contain'
+              }} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.socialMediaButton}>
-
+            <Image
+              source={require('../assets/fbicon.png')}
+              style={{
+                width: '100%',
+                height: '100%',
+                resizeMode: 'contain'
+              }} />
           </TouchableOpacity>
         </View>
       </View>

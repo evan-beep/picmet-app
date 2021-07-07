@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, Button, StyleSheet, TouchableOpacity, Image, TextInput, Appearance } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import firebase from 'firebase/app'
 
@@ -42,6 +42,8 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [bday, setBday] = useState(null);
 
+  const [darkMode, setDarkMode] = useState(false);
+
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -56,45 +58,45 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
     hideDatePicker();
   };
 
-  function registerWithGoogle(){
+  function registerWithGoogle() {
     var provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider).then(function(e){
-        if(e.additionalUserInfo.isNewUser){
-            let email = e.additionalUserInfo.profile.email;
-            //new pop up to get u and e
-            let e
-            let u
-            firebase.database().ref("user_list").push({
-              email: e,
-              bday: bday,
-              displayname:u,
-            })
-            navigation("main")
-        }
-        else{
-          Alert.alert("註冊失敗", "此帳號已註冊！");
-        }
+    firebase.auth().signInWithPopup(provider).then(function (e) {
+      if (e.additionalUserInfo.isNewUser) {
+        let email = e.additionalUserInfo.profile.email;
+        //new pop up to get u and e
+        let e
+        let u
+        firebase.database().ref("user_list").push({
+          email: e,
+          bday: bday,
+          displayname: u,
+        })
+        navigation("main")
+      }
+      else {
+        Alert.alert("註冊失敗", "此帳號已註冊！");
+      }
     })
-    .catch(function(error) {
+      .catch(function (error) {
         var errorMessage = error.message;
         Alert.alert("error", errorMessage);
-    });
+      });
   }
 
   function register(u: string, e: string, p: string) {
     firebase.auth().createUserWithEmailAndPassword(e, p)
-    .then(function(){
-      firebase.database().ref("user_list").push({
-        email: e,
-        bday: bday,
-        displayname:u,
+      .then(function () {
+        firebase.database().ref("user_list").push({
+          email: e,
+          bday: bday,
+          displayname: u,
+        })
+        navigation.navigate('Main');
       })
-      navigation.navigate('Main');
-    })
-    .catch(function(error) {
+      .catch(function (error) {
         var errorMessage = error.message;
         Alert.alert("error", errorMessage);
-    });
+      });
   }
 
   function togglePassVisible() {
@@ -104,6 +106,9 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
       setPassVisible(true)
     }
   }
+  useEffect(() => {
+    setDarkMode(Appearance.getColorScheme() === 'dark');
+  }, [])
 
   return (
     <View style={styles.container}>
@@ -178,6 +183,7 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
+          isDarkModeEnabled={darkMode}
           onConfirm={handleConfirm}
           onCancel={hideDatePicker}
         />
@@ -209,13 +215,25 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
           justifyContent: 'space-around',
           alignItems: 'center'
         }]}>
-          <TouchableOpacity 
-          onPress={()=>registerWithGoogle()}
-          style={styles.socialMediaButton}>
-
+          <TouchableOpacity
+            onPress={() => registerWithGoogle()}
+            style={styles.socialMediaButton}>
+            <Image
+              source={require('../assets/googleicon.png')}
+              style={{
+                width: '100%',
+                height: '100%',
+                resizeMode: 'contain'
+              }} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.socialMediaButton}>
-
+            <Image
+              source={require('../assets/fbicon.png')}
+              style={{
+                width: '100%',
+                height: '100%',
+                resizeMode: 'contain'
+              }} />
           </TouchableOpacity>
         </View>
       </View>

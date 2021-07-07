@@ -30,7 +30,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             style={styles.button}
             source={require('../assets/registerButton.png')} />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Main')}>
           <Image
             style={styles.button}
             source={require('../assets/noAccountButton.png')} />

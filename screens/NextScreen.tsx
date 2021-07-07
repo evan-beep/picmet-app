@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { View, Button, TouchableOpacity, StyleSheet, TextInput, Image, FlatList, Platform, KeyboardAvoidingView } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Button, TouchableOpacity, StyleSheet, TextInput, Image, FlatList, Platform, KeyboardAvoidingView, Appearance } from 'react-native';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { DrawerMenu, } from './DrawerMenu';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 import { Modal, Portal, Provider, Text } from 'react-native-paper';
 
@@ -46,6 +47,30 @@ function HotMain({ navigation }: { navigation: any }) {
   const [visible, setVisible] = React.useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currItem, setCurrItem] = React.useState('Surface Pro 7');
+
+  const [hasBirthday, setHasBirthday] = useState(true);
+
+  const [bday, setBday] = useState(null);
+  const [displayName, setDisplayName] = useState('');
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  useEffect(() => {
+    setDarkMode(Appearance.getColorScheme() === 'dark');
+  }, [])
+
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date: any) => {
+    setBday(date);
+    hideDatePicker();
+  };
 
   if (DATA.length % 2 !== 0) {
     DATA.push({ id: 7, name: 'empty', likes: '', dislikes: '', comments: '', imageURL: "" },
@@ -203,6 +228,91 @@ function HotMain({ navigation }: { navigation: any }) {
     )
   }
 
+  function updateDNameBDay() {
+    setHasBirthday(true);
+  }
+
+  const GetBdayModal = () => {
+    return (
+
+      <View style={styles.container}>
+        <View style={styles.topContainer}>
+
+        </View>
+        <View style={{ width: '100%', height: '100%', justifyContent: 'flex-start', alignItems: 'center' }}>
+          <View style={{ width: '100%', height: 100, alignItems: 'center' }}>
+            <Text style={{ color: 'white', fontSize: 25, width: '60%', lineHeight: 30 }}>
+              {
+                `在開始之前\n麻煩您選擇顯示名稱並提供您的生日`
+              }
+
+            </Text>
+          </View>
+          <View style={[styles.textInputBG, styles.midCol]}>
+            <TextInput
+              style={styles.input}
+              onChangeText={setDisplayName}
+              value={displayName}
+              placeholder="使用者名稱"
+              blurOnSubmit={false}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={showDatePicker}
+            style={[styles.midCol, styles.textInputBG, {
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: '#7CAEDE'
+            }]}>
+            <Text style={{
+              fontSize: 20,
+              color: 'white',
+              fontWeight: '700'
+            }}>
+              選擇生日{bday ? '：' + bday.toISOString().substring(0, 10) : ''}
+            </Text>
+          </TouchableOpacity>
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode="date"
+            isDarkModeEnabled={darkMode}
+            onConfirm={handleConfirm}
+            onCancel={hideDatePicker}
+          />
+
+
+          <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity
+              onPress={() => { updateDNameBDay() }}
+              style={[styles.midCol, styles.textInputBG, {
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#71D0DA'
+              }]}>
+              <Text style={{
+                fontSize: 20,
+                color: 'white',
+                fontWeight: '700'
+              }}>
+                完成
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={[styles.midCol, {
+            height: 80,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'center'
+          }]}>
+          </View>
+        </View>
+      </View>)
+  }
+
 
   return (
     <Provider>
@@ -307,6 +417,12 @@ function HotMain({ navigation }: { navigation: any }) {
             </KeyboardAvoidingView>
           </Modal>
         </Portal>
+
+        <Portal>
+          <Modal style={{ marginTop: 0, marginBottom: 0 }} visible={!hasBirthday}>
+            {GetBdayModal()}
+          </Modal>
+        </Portal>
       </View>
     </Provider>
   )
@@ -323,6 +439,8 @@ export default function MainProductPage({ navigation }: { navigation: any }) {
     </Drawer.Navigator>
   )
 }
+
+
 
 
 const styles = StyleSheet.create({
@@ -448,6 +566,47 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 10,
     flexDirection: 'row',
+  },
+  container: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: '#B184CF',
+    display: 'flex',
+    alignContent: 'center',
+    alignItems: 'center'
+    //justifyContent: 'center'
+  },
+
+  midContainer: {
+    width: '80%',
+    height: '50%',
+    display: 'flex',
+    //backgroundColor: 'red',
+    flexDirection: 'column',
+  },
+
+  loginTXT: {
+    width: '100%',
+    height: 50
+  },
+
+
+  midCol: {
+    marginTop: 25
+  },
+  socialMediaButton: {
+    width: '40%',
+    height: 60,
+    backgroundColor: 'white',
+    borderRadius: 20
+  },
+  visibility: {
+    height: 30,
+    width: 30,
+    resizeMode: 'contain',
+    position: 'absolute',
+    right: 15
   }
+
 
 })
