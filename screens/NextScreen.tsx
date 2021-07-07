@@ -13,6 +13,36 @@ import History from './History'
 import Favourites from './Favourites';
 import WishNotes from './WishNotes';
 
+
+
+import firebase from 'firebase/app'
+
+// Optionally import the services that you want to use
+import "firebase/auth";
+import "firebase/database";
+//import "firebase/firestore";
+//import "firebase/functions";
+import "firebase/storage";
+import { Alert } from 'react-native';
+
+// Initialize Firebase
+var firebaseConfig = {
+  apiKey: "AIzaSyC4sYfz1pRXlf1AobgQ69aDMzw3F3imGQo",
+  authDomain: "picmet-app.firebaseapp.com",
+  databaseURL: "https://picmet-app-default-rtdb.firebaseio.com",
+  projectId: "picmet-app",
+  storageBucket: "picmet-app.appspot.com",
+  messagingSenderId: "1040692554774",
+  appId: "1:1040692554774:web:ae603f95751b34ae465937",
+  measurementId: "G-8RNR9L5QHF"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app(); // if already initialized, use that one
+}
+
 const Drawer = createDrawerNavigator();
 
 const DATA = [
@@ -36,17 +66,32 @@ const COMMENTS = [
   { id: 6, userID: 'player6', itemID: 'kke', content: '已經沒有囉', likes: '10', dislikes: '3', comments: '10', imageURL: '../assets/london.png' },
 ];
 
+var itemList:any = []
+
+function getItem(){
+  firebase.database().ref("item_list").once('value').then(
+    async function(snapshot){
+      await snapshot.forEach(function(childSnapshot){
+          var itemkey = childSnapshot.val();
+          itemList.push({id:childSnapshot.key, ...itemkey});
+    })
+  }).then(
+    ()=>{
+      console.log(itemList[0]);
+    }
+  )
+}
 
 function HotMain({ navigation }: { navigation: any }) {
-  //
+  useEffect(getItem, []);
   const showModal = (item: any) => {
-    setCurrItem(item.item.name)
+    setCurrItem(item.item)
     setVisible(true);
   };
   const hideModal = () => setVisible(false);
   const [visible, setVisible] = React.useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [currItem, setCurrItem] = React.useState('Surface Pro 7');
+  const [currItem, setCurrItem] = React.useState(null);
 
   const [hasBirthday, setHasBirthday] = useState(true);
 
@@ -78,7 +123,38 @@ function HotMain({ navigation }: { navigation: any }) {
   }
 
   function addToFavourite() {
+    firebase.auth().onAuthStateChanged(async function(user) {
+      if(user){
+        let user_email = user.email;
+        let user_list = firebase.database().ref('user_list');
+        await user_list.once('value').then(function(snapshot){
+          snapshot.forEach(function(childSnapshot){
+            var childData = childSnapshot.val();
+            if(childData.email == user_email){
+              let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
+              user_favorite_list.once('value').then(function(s){
+                s.forEach(function(c){
+                  let itemID = c.val().itemID;
+                  if(itemID == currItem.id){
+                    firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list/" + c.key).remove();
+                  }
+                })
+              }).then(function(){
+                user_favorite_list.push({
+                  itemID : currItem.id
+                })
+                Alert.alert("添加成功","成功添加至我的最愛");
+              })
+            }
+          })
+        })
 
+      }
+      else{
+        Alert.alert("添加失敗","請先等入才可添加商品至最愛！");
+      }
+    })
+    currItem.id
   }
 
   const renderItem = (item: any) => {
@@ -86,7 +162,37 @@ function HotMain({ navigation }: { navigation: any }) {
       item.item.name !== 'empty'
         ?
         <TouchableOpacity
-          onPress={() => showModal(item)}
+          onPress={() => {
+              firebase.auth().onAuthStateChanged(async function(user) {
+                if(user){
+                  let user_email = user.email;
+                  let user_list = firebase.database().ref('user_list');
+                  await user_list.once('value').then(function(snapshot){
+                    snapshot.forEach(function(childSnapshot){
+                      var childData = childSnapshot.val();
+                      if(childData.email == user_email){
+                        let user_history_list = firebase.database().ref('user_list/' + childSnapshot.key + "/history_list");
+                        user_history_list.once('value').then(function(s){
+                          s.forEach(function(c){
+                            let itemID = c.val().itemID;
+                            if(itemID == item.item.id){
+                              console.log('user_list/' + childSnapshot.key + "/history_list/" + c.key);
+                              firebase.database().ref('user_list/' + childSnapshot.key + "/history_list/" + c.key).remove();
+                            }
+                          })
+                        }).then(function(){
+                          user_history_list.push({
+                            itemID : item.item.id
+                          })
+                        })
+                      }
+                    })
+                  })
+                }
+              })
+              showModal(item)
+            }
+          }
           style={styles.itemBlock}>
           <View style={styles.itemTouch}>
             <Image
@@ -148,7 +254,7 @@ function HotMain({ navigation }: { navigation: any }) {
         </View>
         <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Text style={{ fontSize: 40, color: 'white', fontWeight: '700', marginTop: 15 }}>
-            {currItem}
+            {currItem.name}
           </Text>
         </View>
         <TouchableOpacity onPress={addToFavourite} style={{ marginTop: 15, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

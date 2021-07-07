@@ -15,6 +15,34 @@ import RegisterScreen from './screens/RegisterScreen';
 import { Provider } from 'react-native-paper'
 const Stack = createStackNavigator();
 
+import firebase from 'firebase/app'
+
+// Optionally import the services that you want to use
+import "firebase/auth";
+import "firebase/database";
+//import "firebase/firestore";
+//import "firebase/functions";
+import "firebase/storage";
+import { Alert } from 'react-native';
+
+// Initialize Firebase
+var firebaseConfig = {
+  apiKey: "AIzaSyC4sYfz1pRXlf1AobgQ69aDMzw3F3imGQo",
+  authDomain: "picmet-app.firebaseapp.com",
+  databaseURL: "https://picmet-app-default-rtdb.firebaseio.com",
+  projectId: "picmet-app",
+  storageBucket: "picmet-app.appspot.com",
+  messagingSenderId: "1040692554774",
+  appId: "1:1040692554774:web:ae603f95751b34ae465937",
+  measurementId: "G-8RNR9L5QHF"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app(); // if already initialized, use that one
+}
+
 function App() {
 
   const config: TransitionSpec = {
