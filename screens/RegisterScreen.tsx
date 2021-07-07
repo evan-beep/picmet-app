@@ -10,6 +10,7 @@ import "firebase/database";
 //import "firebase/firestore";
 //import "firebase/functions";
 import "firebase/storage";
+import { Alert } from 'react-native';
 
 // Initialize Firebase
 var firebaseConfig = {
@@ -55,15 +56,45 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
     hideDatePicker();
   };
 
-  function register(u: string, e: string, p: string) {
-    firebase.auth().createUserWithEmailAndPassword(e, p).catch(function (error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
+  function registerWithGoogle(){
+    var provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider).then(function(e){
+        if(e.additionalUserInfo.isNewUser){
+            let email = e.additionalUserInfo.profile.email;
+            //new pop up to get u and e
+            let e
+            let u
+            firebase.database().ref("user_list").push({
+              email: e,
+              bday: bday,
+              displayname:u,
+            })
+            navigation("main")
+        }
+        else{
+          Alert.alert("註冊失敗", "此帳號已註冊！");
+        }
+    })
+    .catch(function(error) {
+        var errorMessage = error.message;
+        Alert.alert("error", errorMessage);
     });
+  }
 
-    navigation.navigate('Main');
-
+  function register(u: string, e: string, p: string) {
+    firebase.auth().createUserWithEmailAndPassword(e, p)
+    .then(function(){
+      firebase.database().ref("user_list").push({
+        email: e,
+        bday: bday,
+        displayname:u,
+      })
+      navigation.navigate('Main');
+    })
+    .catch(function(error) {
+        var errorMessage = error.message;
+        Alert.alert("error", errorMessage);
+    });
   }
 
   function togglePassVisible() {
@@ -178,7 +209,9 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
           justifyContent: 'space-around',
           alignItems: 'center'
         }]}>
-          <TouchableOpacity style={styles.socialMediaButton}>
+          <TouchableOpacity 
+          onPress={()=>registerWithGoogle()}
+          style={styles.socialMediaButton}>
 
           </TouchableOpacity>
           <TouchableOpacity style={styles.socialMediaButton}>

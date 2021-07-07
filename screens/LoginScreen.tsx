@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import { View, Text, Button, StyleSheet, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
 import firebase from 'firebase/app'
 
 // Optionally import the services that you want to use
@@ -34,12 +34,16 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
   const [passVisible, setPassVisible] = useState(false);
 
   function login(e: string, p: string) {
-    firebase.auth().signInWithEmailAndPassword(e, p).catch(function (error) {
+    firebase.auth().signInWithEmailAndPassword(e, p)
+    .then(function(){
+      navigation.navigate('Main');
+    })
+    .catch(function (error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
+      Alert.alert("error", errorMessage);
     });
-    navigation.navigate('Main');
   }
 
   function togglePassVisible() {
