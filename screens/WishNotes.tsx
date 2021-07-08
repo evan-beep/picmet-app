@@ -35,15 +35,15 @@ if (!firebase.apps.length) {
 
 export default function WishNotes({ navigation }: { navigation: any }) {
   const [wishnote, setWishnote] = useState(initWish);
-  function saveWishNote(){
-    firebase.auth().onAuthStateChanged(async function(user) {
-      if(user){
+  function saveWishNote() {
+    firebase.auth().onAuthStateChanged(async function (user) {
+      if (user) {
         let user_email = user.email;
         let user_list = firebase.database().ref('user_list');
-        await user_list.once('value').then(function(snapshot){
-          snapshot.forEach(function(childSnapshot){
+        await user_list.once('value').then(function (snapshot) {
+          snapshot.forEach(function (childSnapshot) {
             var childData = childSnapshot.val();
-            if(childData.email == user_email){
+            if (childData.email == user_email) {
               firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list").remove();
               firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list").push(
                 wishnote
@@ -51,10 +51,10 @@ export default function WishNotes({ navigation }: { navigation: any }) {
             }
           })
         })
-        Alert.alert("儲存成功","已更新願望小清單！");
+        Alert.alert("儲存成功", "已更新願望小清單！");
       }
-      else{
-        Alert.alert("儲存失敗","請先登入才可添加願望小清單！");
+      else {
+        Alert.alert("儲存失敗", "請先登入才可添加願望小清單！");
       }
     })
   }
@@ -67,7 +67,10 @@ export default function WishNotes({ navigation }: { navigation: any }) {
           </Text>
         </View>
         <KeyboardAvoidingView style={{ height: '100%', width: '100%', justifyContent: 'flex-start', alignItems: 'center' }}>
-          <TextInput placeholder={'我想要⋯⋯'} multiline={true} style={{ width: '85%', height: '50%', fontSize: 25, fontWeight: '500', color: 'white' }}>
+          <TextInput
+            onChangeText={setWishnote}
+            value={wishnote}
+            placeholder={'我想要⋯⋯'} multiline={true} style={{ width: '85%', height: '50%', fontSize: 25, fontWeight: '500', color: 'white' }}>
 
           </TextInput>
         </KeyboardAvoidingView>

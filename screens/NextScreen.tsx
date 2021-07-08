@@ -66,21 +66,8 @@ const COMMENTS = [
   { id: 6, userID: 'player6', itemID: 'kke', content: '已經沒有囉', likes: '10', dislikes: '3', comments: '10', imageURL: '../assets/london.png' },
 ];
 
-var itemList:any = []
+var itemList: any = []
 
-function getItem(){
-  firebase.database().ref("item_list").once('value').then(
-    async function(snapshot){
-      await snapshot.forEach(function(childSnapshot){
-          var itemkey = childSnapshot.val();
-          itemList.push({id:childSnapshot.key, ...itemkey});
-    })
-  }).then(
-    ()=>{
-      console.log(itemList[0]);
-    }
-  )
-}
 
 function HotMain({ navigation }: { navigation: any }) {
   useEffect(getItem, []);
@@ -94,7 +81,11 @@ function HotMain({ navigation }: { navigation: any }) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currItem, setCurrItem] = React.useState(null);
 
+  const [hotMainItems, setHotMainItems] = useState<any>([]);
+
   const [hasBirthday, setHasBirthday] = useState(true);
+
+  const [myComment, setMyComment] = useState('');
 
   const [bday, setBday] = useState(null);
   const [displayName, setDisplayName] = useState('');
@@ -118,41 +109,79 @@ function HotMain({ navigation }: { navigation: any }) {
     hideDatePicker();
   };
 
-  if (DATA.length % 2 !== 0) {
-    DATA.push({ id: 7, name: 'empty', likes: '', dislikes: '', comments: '', imageURL: "" },
-    )
+  function fixLayout(somelist: any[]) {
+    let temp: any = [];
+    temp = somelist;
+    if (somelist.length % 2 !== 0) {
+      temp.push({ id: 'yobros', name: 'empty', likes: '', dislikes: '', comments: '', imageURL: "" });
+      setHotMainItems(temp);
+    }
+  }
+
+  function commentLike() {
+
+  }
+
+  function commentDislike() {
+
+  }
+
+  function sendMyComment() {
+
+  }
+
+  function itemLike() {
+
+  }
+
+  function itemDislike() {
+
+  }
+
+  function getItem() {
+    firebase.database().ref("item_list").once('value').then(
+      async function (snapshot) {
+        await snapshot.forEach(function (childSnapshot) {
+          var itemkey = childSnapshot.val();
+          itemList.push({ id: childSnapshot.key, ...itemkey });
+        })
+      }).then(
+        () => {
+          fixLayout(itemList);
+        }
+      )
   }
 
   function addToFavourite() {
-    firebase.auth().onAuthStateChanged(async function(user) {
-      if(user){
+    firebase.auth().onAuthStateChanged(async function (user) {
+      if (user) {
         let user_email = user.email;
         let user_list = firebase.database().ref('user_list');
-        await user_list.once('value').then(function(snapshot){
-          snapshot.forEach(function(childSnapshot){
+        await user_list.once('value').then(function (snapshot) {
+          snapshot.forEach(function (childSnapshot) {
             var childData = childSnapshot.val();
-            if(childData.email == user_email){
+            if (childData.email == user_email) {
               let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
-              user_favorite_list.once('value').then(function(s){
-                s.forEach(function(c){
+              user_favorite_list.once('value').then(function (s) {
+                s.forEach(function (c) {
                   let itemID = c.val().itemID;
-                  if(itemID == currItem.id){
+                  if (itemID == currItem.id) {
                     firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list/" + c.key).remove();
                   }
                 })
-              }).then(function(){
+              }).then(function () {
                 user_favorite_list.push({
-                  itemID : currItem.id
+                  itemID: currItem.id
                 })
-                Alert.alert("添加成功","成功添加至我的最愛");
+                Alert.alert("添加成功", "成功添加至我的最愛");
               })
             }
           })
         })
 
       }
-      else{
-        Alert.alert("添加失敗","請先等入才可添加商品至最愛！");
+      else {
+        Alert.alert("添加失敗", "請先等入才可添加商品至最愛！");
       }
     })
     currItem.id
@@ -164,50 +193,48 @@ function HotMain({ navigation }: { navigation: any }) {
         ?
         <TouchableOpacity
           onPress={() => {
-              firebase.auth().onAuthStateChanged(async function(user) {
-                if(user){
-                  let user_email = user.email;
-                  let user_list = firebase.database().ref('user_list');
-                  await user_list.once('value').then(function(snapshot){
-                    snapshot.forEach(function(childSnapshot){
-                      var childData = childSnapshot.val();
-                      if(childData.email == user_email){
-                        let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
-                        user_favorite_list.once('value').then(function(s){
-                          s.forEach(function(c){
-                            let itemID = c.val().itemID;
-                            if(itemID == item.item.id){
-                              console.log('user_list/' + childSnapshot.key + "/favorite_list/" + c.key);
-                              setIs_favorite(true);
-                            }
-                          })
+            firebase.auth().onAuthStateChanged(async function (user) {
+              if (user) {
+                let user_email = user.email;
+                let user_list = firebase.database().ref('user_list');
+                await user_list.once('value').then(function (snapshot) {
+                  snapshot.forEach(function (childSnapshot) {
+                    var childData = childSnapshot.val();
+                    if (childData.email == user_email) {
+                      let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
+                      user_favorite_list.once('value').then(function (s) {
+                        s.forEach(function (c) {
+                          let itemID = c.val().itemID;
+                          if (itemID == item.item.id) {
+                            setIs_favorite(true);
+                          }
                         })
-                        let user_history_list = firebase.database().ref('user_list/' + childSnapshot.key + "/history_list");
-                        user_history_list.once('value').then(function(s){
-                          s.forEach(function(c){
-                            let itemID = c.val().itemID;
-                            if(itemID == item.item.id){
-                              console.log('user_list/' + childSnapshot.key + "/history_list/" + c.key);
-                              firebase.database().ref('user_list/' + childSnapshot.key + "/history_list/" + c.key).remove();
-                            }
-                          })
-                        }).then(function(){
-                          user_history_list.push({
-                            itemID : item.item.id
-                          })
+                      })
+                      let user_history_list = firebase.database().ref('user_list/' + childSnapshot.key + "/history_list");
+                      user_history_list.once('value').then(function (s) {
+                        s.forEach(function (c) {
+                          let itemID = c.val().itemID;
+                          if (itemID == item.item.id) {
+                            firebase.database().ref('user_list/' + childSnapshot.key + "/history_list/" + c.key).remove();
+                          }
                         })
-                      }
-                    })
+                      }).then(function () {
+                        user_history_list.push({
+                          itemID: item.item.id
+                        })
+                      })
+                    }
                   })
-                }
-              })
-              showModal(item)
-            }
+                })
+              }
+            })
+            showModal(item)
+          }
           }
           style={styles.itemBlock}>
           <View style={styles.itemTouch}>
             <Image
-              source={{ uri: item.item.imageURL }}
+              source={{ uri: item.item.photourl }}
               style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
             />
           </View>
@@ -223,7 +250,7 @@ function HotMain({ navigation }: { navigation: any }) {
                 style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
               />
               <Text style={styles.likeTXT}>
-                {item.item.likes}
+                {item.item.likes ? item.item.likes : 0}
               </Text>
             </View>
             <View style={styles.likes}>
@@ -232,7 +259,7 @@ function HotMain({ navigation }: { navigation: any }) {
                 style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
               />
               <Text style={styles.likeTXT}>
-                {item.item.dislikes}
+                {item.item.dislikes ? item.item.dislikes : 0}
               </Text>
             </View>
             <View style={styles.likes}>
@@ -241,7 +268,7 @@ function HotMain({ navigation }: { navigation: any }) {
                 style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
               />
               <Text style={styles.likeTXT}>
-                {item.item.comments}
+                {item.item.comments ? item.item.comments : 0}
               </Text>
             </View>
 
@@ -250,6 +277,12 @@ function HotMain({ navigation }: { navigation: any }) {
         </TouchableOpacity>
         :
         <View style={styles.itemBlock}>
+          <View style={{ height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: '600' }}>
+              沒有更多囉
+            </Text>
+          </View>
+
 
         </View>
 
@@ -261,18 +294,39 @@ function HotMain({ navigation }: { navigation: any }) {
     return (
       <View style={styles.flatlistHeaderContainer}>
         <View style={{ backgroundColor: 'white', width: '90%', height: 350, borderRadius: 20 }}>
-          <Image source={{ uri: DATA[0].imageURL }} style={{ width: '100%', height: '100%', resizeMode: 'contain' }} />
+          <Image source={{ uri: currItem.photourl }} style={{ width: '100%', height: '100%', resizeMode: 'contain' }} />
         </View>
         <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ fontSize: 40, color: 'white', fontWeight: '700', marginTop: 15 }}>
+          <Text style={{ fontSize: 40, color: 'white', fontWeight: '700', marginTop: 15, maxWidth: '80%', overflow: 'scroll' }}>
             {currItem.name}
           </Text>
         </View>
-        <TouchableOpacity onPress={addToFavourite} style={{ marginTop: 15, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ width: '80%', height: 50, backgroundColor: '#7CAEDE', borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: '600' }}>添加至我的最愛</Text>
+        <View style={{ marginTop: 15, width: '80%', height: 60, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity
+            onPress={itemLike}
+            style={{ width: '40%', height: 50, alignItems: 'center', justifyContent: 'center' }}>
+            <Image
+              style={{ width: 50, height: 50, resizeMode: 'contain' }}
+              source={require('../assets/like.png')}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={itemDislike}
+            style={{ width: '40%', height: 50, alignItems: 'center', justifyContent: 'center' }}>
+            <Image
+              style={{ width: 50, height: 50, resizeMode: 'contain' }}
+              source={require('../assets/dislike.png')}
+            />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity onPress={addToFavourite} style={{ marginTop: 15, width: '80%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ width: '100%', height: 50, backgroundColor: '#7CAEDE', borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
+            <View style={{ width: 50, height: 30 }}></View>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: '600' }}>{is_favorite ? '已添加至我的最愛' : '添加至我的最愛'}</Text>
+            <Image source={require('../assets/star_outline.png')} style={{ marginLeft: 20, width: 30, height: 30, resizeMode: 'contain' }} />
+            <Image source={require('../assets/star_filled.png')} style={is_favorite ? { marginLeft: 20, width: 30, height: 30, resizeMode: 'contain' } : { display: 'none' }} />
           </View>
-          <Image source={require('../assets/star_outline.png')} style={{ position: 'absolute', right: 80, width: 30, height: 30, resizeMode: 'contain' }} />
+
         </TouchableOpacity>
         <View style={{ width: '100%', height: 50, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', }}>
           <Text style={{ color: 'white', fontSize: 20, fontWeight: '600' }}>
@@ -311,24 +365,33 @@ function HotMain({ navigation }: { navigation: any }) {
                 <View style={{ flex: 2 }}>
 
                 </View>
-                <View style={styles.likes}>
-                  <Image
-                    source={require('../assets/like.png')}
-                    style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
-                  />
+                <TouchableOpacity
+                  onPress={commentLike}
+                  style={styles.likes}>
+                  <View style={{ marginRight: 5, width: 20, height: 20 }}>
+                    <Image
+                      source={require('../assets/like.png')}
+                      style={{ width: 20, height: 20, resizeMode: 'contain' }}
+                    />
+                  </View>
                   <Text style={styles.likeTXT}>
                     {item.item.likes}
                   </Text>
-                </View>
-                <View style={styles.likes}>
-                  <Image
-                    source={require('../assets/dislike.png')}
-                    style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
-                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={commentDislike}
+                  style={styles.likes}>
+                  <View style={{ marginRight: 5, width: 20, height: 20 }}>
+                    <Image
+                      source={require('../assets/dislike.png')}
+                      style={{ width: 20, height: 20, resizeMode: 'contain' }}
+                    />
+                  </View>
+
                   <Text style={styles.likeTXT}>
                     {item.item.dislikes}
                   </Text>
-                </View>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -473,7 +536,7 @@ function HotMain({ navigation }: { navigation: any }) {
 
         <View style={styles.commentList}>
           <FlatList
-            data={DATA}
+            data={hotMainItems}
             keyExtractor={item => item.id.toString()}
             ListHeaderComponent={mainHeader}
             ListHeaderComponentStyle={{ width: '90%', height: 60, alignItems: 'flex-start', justifyContent: 'center' }}
@@ -517,14 +580,14 @@ function HotMain({ navigation }: { navigation: any }) {
                 <View style={{ position: 'absolute', bottom: 0, height: 100, width: '100%', backgroundColor: '#7CAEDE', display: 'flex', flexDirection: 'row' }}>
                   <View style={{ width: '80%', height: 40, backgroundColor: 'white', borderRadius: 10, display: 'flex', justifyContent: 'center', margin: 10, marginTop: 20 }}>
                     <TextInput
+                      value={myComment}
+                      onChangeText={setMyComment}
                       style={{ marginLeft: 10, width: '95%', height: '90%', fontSize: 20, fontWeight: '500' }}
                       placeholder="我想說⋯⋯"
                     />
                   </View>
                   <TouchableOpacity
-                    onPress={() => {
-                      
-                    }}
+                    onPress={sendMyComment}
                     style={{ width: 40, height: 40, marginTop: 20 }}>
                     <Image
                       style={{ width: 40, height: 40, resizeMode: 'contain' }}
@@ -669,7 +732,6 @@ const styles = StyleSheet.create({
     height: '100%'
   },
   flatlistHeaderContainer: {
-    height: 550,
     width: '100%',
     //backgroundColor: 'blue',
     alignItems: 'center',

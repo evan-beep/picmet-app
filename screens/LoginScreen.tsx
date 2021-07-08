@@ -57,7 +57,7 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
           <Image
             style={[styles.backButton, { resizeMode: 'contain' }]}
             source={require('../assets/backarrow.png')} />
@@ -76,6 +76,8 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
             onChangeText={setEmail}
             value={email}
             placeholder="Email"
+            placeholderTextColor='#a3a3a3'
+
           />
         </View>
         <View style={[styles.textInputBG, styles.midCol]}>
@@ -85,6 +87,8 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
             onChangeText={setPassword}
             value={password}
             placeholder="Password"
+            placeholderTextColor='#a3a3a3'
+
           />
           <TouchableOpacity
             onPress={() => togglePassVisible()}

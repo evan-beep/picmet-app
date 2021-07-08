@@ -135,7 +135,7 @@ export function DrawerMenu(props: any) {
               登出
             </Text>
           )}
-          onPress={() => { }}
+          onPress={() => { props.navigation.navigate('Login') }}
 
         />
       </Drawer.Section>
