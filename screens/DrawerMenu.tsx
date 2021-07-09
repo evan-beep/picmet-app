@@ -18,6 +18,34 @@ import {
 } from 'react-native-paper'
 import { useState } from 'react';
 
+import firebase from 'firebase/app'
+
+// Optionally import the services that you want to use
+import "firebase/auth";
+import "firebase/database";
+//import "firebase/firestore";
+//import "firebase/functions";
+import "firebase/storage";
+import { Alert } from 'react-native';
+
+// Initialize Firebase
+var firebaseConfig = {
+  apiKey: "AIzaSyC4sYfz1pRXlf1AobgQ69aDMzw3F3imGQo",
+  authDomain: "picmet-app.firebaseapp.com",
+  databaseURL: "https://picmet-app-default-rtdb.firebaseio.com",
+  projectId: "picmet-app",
+  storageBucket: "picmet-app.appspot.com",
+  messagingSenderId: "1040692554774",
+  appId: "1:1040692554774:web:ae603f95751b34ae465937",
+  measurementId: "G-8RNR9L5QHF"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app(); // if already initialized, use that one
+}
+
 export function DrawerMenu(props: any) {
 
   const [currPage, setCurrPage] = useState('hotmain');
@@ -135,7 +163,9 @@ export function DrawerMenu(props: any) {
               登出
             </Text>
           )}
-          onPress={() => { props.navigation.navigate('Login') }}
+          onPress={() => { 
+            firebase.auth().signOut();
+            props.navigation.navigate('Login') }}
 
         />
       </Drawer.Section>
