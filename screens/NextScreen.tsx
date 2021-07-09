@@ -115,6 +115,8 @@ function HotMain({ navigation }: { navigation: any }) {
     if (somelist.length % 2 !== 0) {
       temp.push({ id: 'yobros', name: 'empty', likes: '', dislikes: '', comments: '', imageURL: "" });
       setHotMainItems(temp);
+    } else {
+      setHotMainItems(temp);
     }
   }
 
@@ -148,6 +150,7 @@ function HotMain({ navigation }: { navigation: any }) {
       }).then(
         () => {
           fixLayout(itemList);
+          itemList = [];
         }
       )
   }
