@@ -98,7 +98,7 @@ function HotMain({ navigation }: { navigation: any }) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
-  const [likeOrDis, setLikeOrDis] = useState('Dislike');
+  const [likeOrDis, setLikeOrDis] = useState('None');
 
   useEffect(() => {
     setDarkMode(Appearance.getColorScheme() === 'dark');
@@ -191,6 +191,12 @@ function HotMain({ navigation }: { navigation: any }) {
   }
 
   function itemLike() {
+    if (likeOrDis === 'Like') {
+      setLikeOrDis('None');
+    } else {
+      setLikeOrDis('Like');
+    }
+
 
     firebase.auth().onAuthStateChanged(async function (user) {
       if (user) {
@@ -245,7 +251,11 @@ function HotMain({ navigation }: { navigation: any }) {
   }
 
   function itemDislike() {
-
+    if (likeOrDis === 'Dislike') {
+      setLikeOrDis('None');
+    } else {
+      setLikeOrDis('Dislike');
+    }
   }
 
   function getItem() {
