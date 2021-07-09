@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Button, TouchableOpacity, StyleSheet, TextInput, Image, FlatList, Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback } from 'react-native';
 import { Text } from 'react-native-paper';
 
@@ -35,6 +35,32 @@ if (!firebase.apps.length) {
 
 export default function WishNotes({ navigation }: { navigation: any }) {
   const [wishnote, setWishnote] = useState(initWish);
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged(async function (user) {
+      if (user) {
+        let user_email = user.email;
+        let user_list = firebase.database().ref('user_list');
+        await user_list.once('value').then(function (snapshot) {
+          snapshot.forEach(function (childSnapshot) {
+            var childData = childSnapshot.val();
+            if (childData.email == user_email) {
+              let user_wish_list = firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list");
+              user_wish_list.once('value').then(function (s) {
+                s.forEach(function (c) {
+                  let wish_string = c.val();
+                  setWishnote(wish_string);
+                })
+              })
+            }
+          })
+        })
+      }
+      else{
+        Alert.alert("錯誤","請先登入才可使用此功能");
+        navigation.navigate("Login");
+      }
+    })
+  }, [])
   function saveWishNote() {
     firebase.auth().onAuthStateChanged(async function (user) {
       if (user) {

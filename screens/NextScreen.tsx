@@ -74,6 +74,11 @@ function HotMain({ navigation }: { navigation: any }) {
   const showModal = (item: any) => {
     setCurrItem(item.item)
     setVisible(true);
+    firebase.database().ref("item_list/" + item.item.id + "/click").get().then(function(e){
+      e.val();
+      firebase.database().ref("item_list/" + item.item.id + "/click").set(e.val()+1);
+    });
+    getComment(item.item);
   };
   const hideModal = () => setVisible(false);
   const [visible, setVisible] = React.useState(false);
@@ -109,6 +114,22 @@ function HotMain({ navigation }: { navigation: any }) {
     hideDatePicker();
   };
 
+  function getComment(item: any){
+    let comment_list: any = [];
+    let current_item_comment = firebase.database().ref("item_list/" + item.id + "/comment_list");
+    current_item_comment.once('value').then(
+      function (snapshot) {
+        snapshot.forEach(function (childSnapshot) {
+          var childData = childSnapshot.val();
+          firebase.database().ref("comment_list/" + childData).get().then(
+          function(e){
+            comment_list.push({comment_id:e.key , ...e.val()});
+          });
+        })
+      })
+    console.log(comment_list);
+  }
+
   function fixLayout(somelist: any[]) {
     let temp: any = [];
     temp = somelist;
@@ -120,20 +141,98 @@ function HotMain({ navigation }: { navigation: any }) {
     }
   }
 
-  function commentLike() {
-
+  function commentLike(comment: any) {
   }
 
   function commentDislike() {
-
   }
 
   function sendMyComment() {
-
+    firebase.auth().onAuthStateChanged(async function (user) {
+      if(user){
+        let user_email = user.email;
+        let comment_list = firebase.database().ref('comment_list');
+        comment_list.push({
+          user_email: user_email,
+          itemID: currItem.id,
+          content: myComment
+        }).then(async function(e){
+          let comment_id = e.path.pieces_[1];
+          let user_list = firebase.database().ref('user_list');
+          await user_list.once('value').then(function (snapshot) {
+            snapshot.forEach(function (childSnapshot) {
+              var childData = childSnapshot.val();
+              if (childData.email == user_email) {
+                firebase.database().ref("user_list/"+ childSnapshot.key + "/comment_list").push(comment_id)
+              }
+            })
+          })
+          firebase.database().ref('item_list/' + currItem.id + "/comment_list").push(comment_id);
+          firebase.database().ref('item_list/' + currItem.id + "/commentNum").get().then(function(e){
+            firebase.database().ref('item_list/' + currItem.id + "/commentNum").set(e.val()+1);
+          })
+        }).then(function(){
+          setMyComment("");
+        })
+      }
+      else{
+        Alert.alert("錯誤", "請先登入才可使用此功能");
+        setMyComment("");
+      }
+    })
   }
 
   function itemLike() {
-
+    firebase.auth().onAuthStateChanged(async function (user) {
+      if(user){
+        let user_email = user.email;
+        let is_liked = false;
+        let user_list = firebase.database().ref("user_list");
+        let like_userlist = firebase.database().ref("item_list" + currItem.id + "/like_userlist");
+        like_userlist.once('value').then(function(snapshot) {
+          snapshot.forEach(function (childSnapshot) {
+            let email = childSnapshot.val();
+            if(email == user_email)
+              is_liked = true;
+          })
+        }).then(function(){
+          if(is_liked == false){
+            firebase.database().ref("item_list/" + currItem.id + "/likeNum").get().then(function(e){
+              firebase.database().ref("item_list/" + currItem.id + "/likeNum").update(e.val() + 1);
+            })
+            //detect the dislike
+            let dislike_userlist = firebase.database().ref("item_list" + currItem.id + "/dislike_userlist");
+            dislike_userlist.once('value').then(function(snapshot) {
+              snapshot.forEach(function (childSnapshot) {
+                let email = childSnapshot.val();
+                if(email == user_email){
+                  firebase.database().ref("item_list" + currItem.id + "/dislike_userlist" + childSnapshot.key).remove();
+                  firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").get().then(function(e){
+                    firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").update(e.val() - 1);
+                  })
+                  // user_list.once('value').then(function (s) {
+                  //   s.forEach(function (c) {
+                  //     let childData = c.val();
+                  //     if(childData.email == user_email){
+                  //       firebase.database().ref("user_list/" + c.key + "/dislike_list/" + currItem.id).remove();
+                  //     }
+                  //   })
+                  // })
+                }
+              })
+            })
+            
+            
+          }
+          else{
+            Alert.alert("", "您已經按過贊了喔！");
+          }
+        })
+      }
+      else{
+        Alert.alert("錯誤", "請先登入才可使用此功能");
+      }
+    })
   }
 
   function itemDislike() {
@@ -142,8 +241,8 @@ function HotMain({ navigation }: { navigation: any }) {
 
   function getItem() {
     firebase.database().ref("item_list").once('value').then(
-      async function (snapshot) {
-        await snapshot.forEach(function (childSnapshot) {
+      function (snapshot) {
+        snapshot.forEach(function (childSnapshot) {
           var itemkey = childSnapshot.val();
           itemList.push({ id: childSnapshot.key, ...itemkey });
         })
@@ -197,7 +296,8 @@ function HotMain({ navigation }: { navigation: any }) {
         <TouchableOpacity
           onPress={() => {
             firebase.auth().onAuthStateChanged(async function (user) {
-              if (user) {
+              if (user) {                
+                await firebase.database().ref("item_list/" + currItem.id + "/click");
                 let user_email = user.email;
                 let user_list = firebase.database().ref('user_list');
                 await user_list.once('value').then(function (snapshot) {
@@ -369,7 +469,7 @@ function HotMain({ navigation }: { navigation: any }) {
 
                 </View>
                 <TouchableOpacity
-                  onPress={commentLike}
+                  onPress={()=>{commentLike(item.item.id)}}
                   style={styles.likes}>
                   <View style={{ marginRight: 5, width: 20, height: 20 }}>
                     <Image
