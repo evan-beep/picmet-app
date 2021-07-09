@@ -85,11 +85,14 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
 
   function register(u: string, e: string, p: string) {
     firebase.auth().createUserWithEmailAndPassword(e, p)
-      .then(function () {
+      .then(function (result) {
         firebase.database().ref("user_list").push({
           email: e,
           bday: bday,
           displayname: u,
+        });
+        result.user.updateProfile({
+          displayName: u
         })
         navigation.navigate('Main');
       })

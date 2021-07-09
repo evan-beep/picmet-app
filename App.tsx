@@ -62,7 +62,7 @@ function App() {
 
       <NavigationContainer>
         <Stack.Navigator
-          screenOptions={{ headerShown: false }}>
+          screenOptions={{ headerShown: false, gestureEnabled: false }}>
           <Stack.Screen name="Start" component={StartSceen} options={{
             transitionSpec: {
               open: config,

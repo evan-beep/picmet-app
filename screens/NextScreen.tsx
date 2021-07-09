@@ -74,9 +74,9 @@ function HotMain({ navigation }: { navigation: any }) {
   const showModal = (item: any) => {
     setCurrItem(item.item)
     setVisible(true);
-    firebase.database().ref("item_list/" + item.item.id + "/click").get().then(function(e){
+    firebase.database().ref("item_list/" + item.item.id + "/click").get().then(function (e) {
       e.val();
-      firebase.database().ref("item_list/" + item.item.id + "/click").set(e.val()+1);
+      firebase.database().ref("item_list/" + item.item.id + "/click").set(e.val() + 1);
     });
     getComment(item.item);
   };
@@ -91,11 +91,15 @@ function HotMain({ navigation }: { navigation: any }) {
   const [hasBirthday, setHasBirthday] = useState(true);
 
   const [myComment, setMyComment] = useState('');
+  const [itemComments, setItemComments] = useState<any[]>([]);
 
   const [bday, setBday] = useState(null);
   const [displayName, setDisplayName] = useState('');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+
+  const [likeOrDis, setLikeOrDis] = useState('Dislike');
+
   useEffect(() => {
     setDarkMode(Appearance.getColorScheme() === 'dark');
   }, [])
@@ -114,7 +118,7 @@ function HotMain({ navigation }: { navigation: any }) {
     hideDatePicker();
   };
 
-  function getComment(item: any){
+  function getComment(item: any) {
     let comment_list: any = [];
     let current_item_comment = firebase.database().ref("item_list/" + item.id + "/comment_list");
     current_item_comment.once('value').then(
@@ -122,12 +126,16 @@ function HotMain({ navigation }: { navigation: any }) {
         snapshot.forEach(function (childSnapshot) {
           var childData = childSnapshot.val();
           firebase.database().ref("comment_list/" + childData).get().then(
-          function(e){
-            comment_list.push({comment_id:e.key , ...e.val()});
-          });
+            function (e) {
+              comment_list.push({ comment_id: e.key, ...e.val() });
+            }
+          );
         })
-      })
-    console.log(comment_list);
+
+      }).then(() => {
+        setItemComments(comment_list);
+      }
+      )
   }
 
   function fixLayout(somelist: any[]) {
@@ -149,33 +157,33 @@ function HotMain({ navigation }: { navigation: any }) {
 
   function sendMyComment() {
     firebase.auth().onAuthStateChanged(async function (user) {
-      if(user){
+      if (user) {
         let user_email = user.email;
         let comment_list = firebase.database().ref('comment_list');
         comment_list.push({
           user_email: user_email,
           itemID: currItem.id,
           content: myComment
-        }).then(async function(e){
+        }).then(async function (e) {
           let comment_id = e.path.pieces_[1];
           let user_list = firebase.database().ref('user_list');
           await user_list.once('value').then(function (snapshot) {
             snapshot.forEach(function (childSnapshot) {
               var childData = childSnapshot.val();
               if (childData.email == user_email) {
-                firebase.database().ref("user_list/"+ childSnapshot.key + "/comment_list").push(comment_id)
+                firebase.database().ref("user_list/" + childSnapshot.key + "/comment_list").push(comment_id)
               }
             })
           })
           firebase.database().ref('item_list/' + currItem.id + "/comment_list").push(comment_id);
-          firebase.database().ref('item_list/' + currItem.id + "/commentNum").get().then(function(e){
-            firebase.database().ref('item_list/' + currItem.id + "/commentNum").set(e.val()+1);
+          firebase.database().ref('item_list/' + currItem.id + "/commentNum").get().then(function (e) {
+            firebase.database().ref('item_list/' + currItem.id + "/commentNum").set(e.val() + 1);
           })
-        }).then(function(){
+        }).then(function () {
           setMyComment("");
         })
       }
-      else{
+      else {
         Alert.alert("錯誤", "請先登入才可使用此功能");
         setMyComment("");
       }
@@ -183,31 +191,32 @@ function HotMain({ navigation }: { navigation: any }) {
   }
 
   function itemLike() {
+
     firebase.auth().onAuthStateChanged(async function (user) {
-      if(user){
+      if (user) {
         let user_email = user.email;
         let is_liked = false;
         let user_list = firebase.database().ref("user_list");
         let like_userlist = firebase.database().ref("item_list" + currItem.id + "/like_userlist");
-        like_userlist.once('value').then(function(snapshot) {
+        like_userlist.once('value').then(function (snapshot) {
           snapshot.forEach(function (childSnapshot) {
             let email = childSnapshot.val();
-            if(email == user_email)
+            if (email == user_email)
               is_liked = true;
           })
-        }).then(function(){
-          if(is_liked == false){
-            firebase.database().ref("item_list/" + currItem.id + "/likeNum").get().then(function(e){
+        }).then(function () {
+          if (is_liked == false) {
+            firebase.database().ref("item_list/" + currItem.id + "/likeNum").get().then(function (e) {
               firebase.database().ref("item_list/" + currItem.id + "/likeNum").update(e.val() + 1);
             })
             //detect the dislike
             let dislike_userlist = firebase.database().ref("item_list" + currItem.id + "/dislike_userlist");
-            dislike_userlist.once('value').then(function(snapshot) {
+            dislike_userlist.once('value').then(function (snapshot) {
               snapshot.forEach(function (childSnapshot) {
                 let email = childSnapshot.val();
-                if(email == user_email){
+                if (email == user_email) {
                   firebase.database().ref("item_list" + currItem.id + "/dislike_userlist" + childSnapshot.key).remove();
-                  firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").get().then(function(e){
+                  firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").get().then(function (e) {
                     firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").update(e.val() - 1);
                   })
                   // user_list.once('value').then(function (s) {
@@ -221,15 +230,15 @@ function HotMain({ navigation }: { navigation: any }) {
                 }
               })
             })
-            
-            
+
+
           }
-          else{
+          else {
             Alert.alert("", "您已經按過贊了喔！");
           }
         })
       }
-      else{
+      else {
         Alert.alert("錯誤", "請先登入才可使用此功能");
       }
     })
@@ -296,7 +305,7 @@ function HotMain({ navigation }: { navigation: any }) {
         <TouchableOpacity
           onPress={() => {
             firebase.auth().onAuthStateChanged(async function (user) {
-              if (user) {                
+              if (user) {
                 await firebase.database().ref("item_list/" + currItem.id + "/click");
                 let user_email = user.email;
                 let user_list = firebase.database().ref('user_list');
@@ -407,7 +416,7 @@ function HotMain({ navigation }: { navigation: any }) {
         <View style={{ marginTop: 15, width: '80%', height: 60, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
           <TouchableOpacity
             onPress={itemLike}
-            style={{ width: '40%', height: 50, alignItems: 'center', justifyContent: 'center' }}>
+            style={likeOrDis === 'Dislike' ? { display: 'none' } : { width: '40%', height: 50, alignItems: 'center', justifyContent: 'center' }}>
             <Image
               style={{ width: 50, height: 50, resizeMode: 'contain' }}
               source={require('../assets/like.png')}
@@ -415,7 +424,7 @@ function HotMain({ navigation }: { navigation: any }) {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={itemDislike}
-            style={{ width: '40%', height: 50, alignItems: 'center', justifyContent: 'center' }}>
+            style={likeOrDis === 'Like' ? { display: 'none' } : { width: '40%', height: 50, alignItems: 'center', justifyContent: 'center' }}>
             <Image
               style={{ width: 50, height: 50, resizeMode: 'contain' }}
               source={require('../assets/dislike.png')}
@@ -426,7 +435,7 @@ function HotMain({ navigation }: { navigation: any }) {
           <View style={{ width: '100%', height: 50, backgroundColor: '#7CAEDE', borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
             <View style={{ width: 50, height: 30 }}></View>
             <Text style={{ color: 'white', fontSize: 20, fontWeight: '600' }}>{is_favorite ? '已添加至我的最愛' : '添加至我的最愛'}</Text>
-            <Image source={require('../assets/star_outline.png')} style={{ marginLeft: 20, width: 30, height: 30, resizeMode: 'contain' }} />
+            <Image source={require('../assets/star_outline.png')} style={is_favorite ? { display: 'none' } : { marginLeft: 20, width: 30, height: 30, resizeMode: 'contain' }} />
             <Image source={require('../assets/star_filled.png')} style={is_favorite ? { marginLeft: 20, width: 30, height: 30, resizeMode: 'contain' } : { display: 'none' }} />
           </View>
 
@@ -469,7 +478,7 @@ function HotMain({ navigation }: { navigation: any }) {
 
                 </View>
                 <TouchableOpacity
-                  onPress={()=>{commentLike(item.item.id)}}
+                  onPress={() => { commentLike(item.item.id) }}
                   style={styles.likes}>
                   <View style={{ marginRight: 5, width: 20, height: 20 }}>
                     <Image
@@ -670,8 +679,8 @@ function HotMain({ navigation }: { navigation: any }) {
                 </View>
                 <View style={styles.flatList}>
                   <FlatList
-                    data={COMMENTS}
-                    keyExtractor={item => item.id.toString()}
+                    data={itemComments}
+                    keyExtractor={item => item.comment_id.toString()}
                     renderItem={CommentContainer}
                     ListHeaderComponent={ListHeader}
                     horizontal={false}

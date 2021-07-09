@@ -27,6 +27,7 @@ import "firebase/database";
 //import "firebase/functions";
 import "firebase/storage";
 import { Alert } from 'react-native';
+import { useEffect } from 'react';
 
 // Initialize Firebase
 var firebaseConfig = {
@@ -49,6 +50,17 @@ if (!firebase.apps.length) {
 export function DrawerMenu(props: any) {
 
   const [currPage, setCurrPage] = useState('hotmain');
+  const [currUser, setCurrUser] = useState<any>(null);
+
+  const firebaseUser = firebase.auth().currentUser;
+
+  useEffect(() => {
+    if (firebaseUser) {
+      setCurrUser(firebaseUser);
+    }
+
+  }, []);
+
 
   return (
     <View style={{ flex: 1, backgroundColor: '#DE75BE' }}>
@@ -81,7 +93,7 @@ export function DrawerMenu(props: any) {
                   fontWeight: '800',
                   lineHeight: 40
                 }}>
-                  陳建新
+                  {currUser ? currUser.displayName : '訪客'}
                 </Title>
               </View>
             </View>
@@ -163,9 +175,10 @@ export function DrawerMenu(props: any) {
               登出
             </Text>
           )}
-          onPress={() => { 
+          onPress={() => {
             firebase.auth().signOut();
-            props.navigation.navigate('Login') }}
+            props.navigation.navigate('Login')
+          }}
 
         />
       </Drawer.Section>
