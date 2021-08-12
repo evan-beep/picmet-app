@@ -291,10 +291,17 @@ function HotMain({ navigation }: { navigation: any }) {
                   }
                 })
               }).then(function () {
-                user_favorite_list.push({
-                  itemID: currItem.id
-                })
-                Alert.alert("添加成功", "成功添加至我的最愛");
+                if(!is_favorite){
+                  user_favorite_list.push({
+                    itemID: currItem.id
+                  })
+                  setIs_favorite(true);
+                  Alert.alert("添加成功", "成功添加至我的最愛");
+                }
+                else{
+                  setIs_favorite(false);
+                  Alert.alert("刪除成功", "成功從我的最愛中刪除");
+                }
               })
             }
           })
