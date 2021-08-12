@@ -754,8 +754,17 @@ const styles = StyleSheet.create({
     height: 260,
     backgroundColor: '#DE75BE',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 15,
     borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+
+    elevation: 4,
   },
   itemTouch: {
     width: '90%',

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { Dimensions } from 'react-native';
 import { View, Button, TouchableOpacity, StyleSheet, TextInput, Image, FlatList, Platform, KeyboardAvoidingView } from 'react-native';
 import { Modal, Portal, Provider, Text } from 'react-native-paper';
 
@@ -10,7 +11,7 @@ const DATA = [
   { id: 3, name: 'kkkk', likes: '125', dislikes: '3', comments: '10', imageURL: "https://i.imgur.com/I7zVE7v.jpeg" },
   { id: 4, name: 'aoskdpa', likes: '212', dislikes: '3', comments: '10', imageURL: "https://i.imgur.com/I7zVE7v.jpeg" },
   { id: 5, name: 'somethign', likes: '94', dislikes: '3', comments: '10', imageURL: "https://i.imgur.com/I7zVE7v.jpeg" },
-  { id: 6, name: '已經沒有囉', likes: '10', dislikes: '3', comments: '10', imageURL: "https://i.imgur.com/I7zVE7v.jpeg" },
+  { id: 6, name: 'chekc', likes: '10', dislikes: '3', comments: '10', imageURL: "https://i.imgur.com/I7zVE7v.jpeg" },
   { id: 7, name: '已經沒有囉', likes: '10', dislikes: '3', comments: '10', imageURL: "https://i.imgur.com/I7zVE7v.jpeg" },
 
 ];
@@ -36,11 +37,9 @@ export default function Favourites({ navigation }: { navigation: any }) {
   const [visible, setVisible] = React.useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currItem, setCurrItem] = React.useState('Surface Pro 7');
+  const [myComment, setMyComment] = useState('');
 
-  if (DATA.length % 2 !== 0) {
-    DATA.push({ id: 7, name: 'empty', likes: '', dislikes: '', comments: '', imageURL: "" },
-    )
-  }
+
 
 
   function removeFromFavourites() {
@@ -49,59 +48,62 @@ export default function Favourites({ navigation }: { navigation: any }) {
 
   const renderItem = (item: any) => {
     return (
-      item.item.name !== 'empty'
-        ?
-        <TouchableOpacity
-          onPress={() => showModal(item)}
-          style={styles.itemBlock}>
-          <View style={styles.itemTouch}>
-            <Image
-              source={{ uri: item.item.imageURL }}
-              style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
-            />
-          </View>
-          <View style={{ width: '100%', height: 30, display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
-            <Text style={{ maxWidth: '90%', fontSize: 20, color: 'white', fontWeight: '600' }}>
+      <TouchableOpacity
+        onPress={() => showModal(item)}
+        style={{
+          width: Dimensions.get('screen').width * 0.95,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'row',
+          height: 160,
+          marginBottom: 20,
+          backgroundColor: 'white',
+          borderRadius: 20,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 3,
+          },
+          shadowOpacity: 0.29,
+          shadowRadius: 4.65,
+
+          elevation: 7,
+        }}>
+        <View style={{
+          width: '40%',
+          height: '80%',
+          backgroundColor: 'white',
+          borderRadius: 10,
+          borderWidth: 10,
+          borderColor: '#DE75BE'
+        }}>
+          <Image
+            source={{ uri: item.item.imageURL }}
+            style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
+          />
+        </View>
+        <View style={{ width: '50%', height: '80%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'column', }}>
+          <View style={{ width: '100%', height: '50%', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 30, color: '#DE75BE', fontWeight: '600' }}>
               {item.item.name}
             </Text>
           </View>
-          <View style={styles.likeDis}>
-            <View style={styles.likes}>
-              <Image
-                source={require('../assets/like.png')}
-                style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
-              />
-              <Text style={styles.likeTXT}>
-                {item.item.likes}
-              </Text>
-            </View>
-            <View style={styles.likes}>
-              <Image
-                source={require('../assets/dislike.png')}
-                style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
-              />
-              <Text style={styles.likeTXT}>
-                {item.item.dislikes}
-              </Text>
-            </View>
-            <View style={styles.likes}>
-              <Image
-                source={require('../assets/commentsIcon.png')}
-                style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
-              />
-              <Text style={styles.likeTXT}>
-                {item.item.comments}
-              </Text>
-            </View>
 
-          </View>
+          <TouchableOpacity
+            style={{ width: '80%', height: '35%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row', backgroundColor: '#DE75BE', borderRadius: 10 }}
+          >
+            <Text style={{ fontSize: 20, color: 'white', fontWeight: '600' }}>
+              解除最愛
+            </Text>
+            <Image
+              source={require('../assets/star_filled.png')} style={{ marginLeft: 20, width: 30, height: 30, resizeMode: 'contain' }}
 
-        </TouchableOpacity>
-        :
-        <View style={styles.itemBlock}>
-
+            />
+          </TouchableOpacity>
         </View>
 
+      </TouchableOpacity>
     )
 
   }
@@ -167,24 +169,33 @@ export default function Favourites({ navigation }: { navigation: any }) {
                 <View style={{ flex: 2 }}>
 
                 </View>
-                <View style={styles.likes}>
-                  <Image
-                    source={require('../assets/like.png')}
-                    style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
-                  />
+                <TouchableOpacity
+                  onPress={() => { }}
+                  style={styles.likes}>
+                  <View style={{ marginRight: 5, width: 20, height: 20 }}>
+                    <Image
+                      source={require('../assets/like.png')}
+                      style={{ width: 20, height: 20, resizeMode: 'contain' }}
+                    />
+                  </View>
                   <Text style={styles.likeTXT}>
                     {item.item.likes}
                   </Text>
-                </View>
-                <View style={styles.likes}>
-                  <Image
-                    source={require('../assets/dislike.png')}
-                    style={{ marginRight: 5, width: 20, height: 20, resizeMode: 'contain' }}
-                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => { }}
+                  style={styles.likes}>
+                  <View style={{ marginRight: 5, width: 20, height: 20 }}>
+                    <Image
+                      source={require('../assets/dislike.png')}
+                      style={{ width: 20, height: 20, resizeMode: 'contain' }}
+                    />
+                  </View>
+
                   <Text style={styles.likeTXT}>
                     {item.item.dislikes}
                   </Text>
-                </View>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -236,19 +247,21 @@ export default function Favourites({ navigation }: { navigation: any }) {
 
         <View style={styles.commentList}>
           <FlatList
+            style={{
+              width: '100%',
+            }}
             data={DATA}
             keyExtractor={item => item.id.toString()}
-            columnWrapperStyle={styles.row}
             ListHeaderComponent={mainHeader}
             ListHeaderComponentStyle={{ width: '90%', height: 60, alignItems: 'flex-start', justifyContent: 'center' }}
             renderItem={renderItem}
             horizontal={false}
-            numColumns={2}
             contentContainerStyle={{
               display: 'flex',
+              width: '100%',
               justifyContent: 'center',
               alignItems: 'center',
-              paddingBottom: 120
+              paddingBottom: 120,
             }}
           />
         </View>
@@ -280,6 +293,8 @@ export default function Favourites({ navigation }: { navigation: any }) {
                 <View style={{ position: 'absolute', bottom: 0, height: 100, width: '100%', backgroundColor: '#7CAEDE', display: 'flex', flexDirection: 'row' }}>
                   <View style={{ width: '80%', height: 40, backgroundColor: 'white', borderRadius: 10, display: 'flex', justifyContent: 'center', margin: 10, marginTop: 20 }}>
                     <TextInput
+                      value={myComment}
+                      onChangeText={setMyComment}
                       style={{ marginLeft: 10, width: '95%', height: '90%', fontSize: 20, fontWeight: '500' }}
                       placeholder="我想說⋯⋯"
                     />
