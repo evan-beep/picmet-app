@@ -34,13 +34,23 @@ if (!firebase.apps.length) {
 
 
 export default function WishNotes({ navigation }: { navigation: any }) {
+  const [currUser, setCurrUser] = useState<any>(null);
+
+  const firebaseUser = firebase.auth().currentUser;
+
+  useEffect(() => {
+    if (firebaseUser) {
+      setCurrUser(firebaseUser);
+    }
+
+  }, []);
+
   const [wishnote, setWishnote] = useState(initWish);
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(async function (user) {
-      if (user) {
-        let user_email = user.email;
+      if (currUser) {
+        let user_email = currUser.email;
         let user_list = firebase.database().ref('user_list');
-        await user_list.once('value').then(function (snapshot) {
+        user_list.once('value').then(function (snapshot) {
           snapshot.forEach(function (childSnapshot) {
             var childData = childSnapshot.val();
             if (childData.email == user_email) {
@@ -59,14 +69,12 @@ export default function WishNotes({ navigation }: { navigation: any }) {
         Alert.alert("錯誤","請先登入才可使用此功能");
         navigation.navigate("Login");
       }
-    })
   }, [])
   function saveWishNote() {
-    firebase.auth().onAuthStateChanged(async function (user) {
-      if (user) {
-        let user_email = user.email;
+      if (currUser) {
+        let user_email = currUser.email;
         let user_list = firebase.database().ref('user_list');
-        await user_list.once('value').then(function (snapshot) {
+        user_list.once('value').then(function (snapshot) {
           snapshot.forEach(function (childSnapshot) {
             var childData = childSnapshot.val();
             if (childData.email == user_email) {
@@ -82,8 +90,7 @@ export default function WishNotes({ navigation }: { navigation: any }) {
       else {
         Alert.alert("儲存失敗", "請先登入才可添加願望小清單！");
       }
-    })
-  }
+    }
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', backgroundColor: '#B184CF' }}>
