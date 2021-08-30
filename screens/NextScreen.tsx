@@ -80,6 +80,17 @@ function HotMain({ navigation }: { navigation: any }) {
     });
     getComment(item.item);
   };
+  const [currUser, setCurrUser] = useState<any>(null);
+
+  const firebaseUser = firebase.auth().currentUser;
+
+  useEffect(() => {
+    if (firebaseUser) {
+      setCurrUser(firebaseUser);
+    }
+
+  }, []);
+
   const hideModal = () => setVisible(false);
   const [visible, setVisible] = React.useState(false);
   const [is_favorite, setIs_favorite] = useState(false);
@@ -156,9 +167,8 @@ function HotMain({ navigation }: { navigation: any }) {
   }
 
   function sendMyComment() {
-    firebase.auth().onAuthStateChanged(async function (user) {
-      if (user) {
-        let user_email = user.email;
+      if (currUser) {
+        let user_email = currUser.email;
         let comment_list = firebase.database().ref('comment_list');
         comment_list.push({
           user_email: user_email,
@@ -187,13 +197,11 @@ function HotMain({ navigation }: { navigation: any }) {
         Alert.alert("錯誤", "請先登入才可使用此功能");
         setMyComment("");
       }
-    })
-  }
+    }
 
   function itemLike() {
-    firebase.auth().onAuthStateChanged(async function (user) {
-      if (user) {
-        let user_email = user.email;
+      if (currUser) {
+        let user_email = currUser.email;
         let user_list = firebase.database().ref("user_list");
         let like_userlist = firebase.database().ref("item_list/" + currItem.id + "/like_userlist");
         if(likeOrDis === 'Like'){
@@ -253,13 +261,11 @@ function HotMain({ navigation }: { navigation: any }) {
       else {
         Alert.alert("錯誤", "請先登入才可使用此功能");
       }
-    })
-  }
+    }
 
   function itemDislike() {
-    firebase.auth().onAuthStateChanged(async function (user) {
-      if (user) {
-        let user_email = user.email;
+      if (currUser) {
+        let user_email = currUser.email;
         let user_list = firebase.database().ref("user_list");
         let dislike_userlist = firebase.database().ref("item_list/" + currItem.id + "/dislike_userlist");
         if(likeOrDis === 'Dislike'){
@@ -319,8 +325,7 @@ function HotMain({ navigation }: { navigation: any }) {
       else {
         Alert.alert("錯誤", "請先登入才可使用此功能");
       }
-    })
-  }
+    }
 
   function getItem() {
     firebase.database().ref("item_list").once('value').then(
@@ -338,11 +343,10 @@ function HotMain({ navigation }: { navigation: any }) {
   }
 
   function addToFavourite() {
-    firebase.auth().onAuthStateChanged(async function (user) {
-      if (user) {
-        let user_email = user.email;
+      if (currUser) {
+        let user_email = currUser.email;
         let user_list = firebase.database().ref('user_list');
-        await user_list.once('value').then(function (snapshot) {
+        user_list.once('value').then(function (snapshot) {
           snapshot.forEach(function (childSnapshot) {
             var childData = childSnapshot.val();
             if (childData.email == user_email) {
@@ -375,9 +379,7 @@ function HotMain({ navigation }: { navigation: any }) {
       else {
         Alert.alert("添加失敗", "請先等入才可添加商品至最愛！");
       }
-    })
-    currItem.id
-  }
+    }
 
   const renderItem = (item: any) => {
     return (
@@ -385,12 +387,10 @@ function HotMain({ navigation }: { navigation: any }) {
         ?
         <TouchableOpacity
           onPress={() => {
-            firebase.auth().onAuthStateChanged(async function (user) {
-              if (user) {
-                await firebase.database().ref("item_list/" + currItem.id + "/click");
-                let user_email = user.email;
+              if (currUser) {
+                let user_email = currUser.email;
                 let user_list = firebase.database().ref('user_list');
-                await user_list.once('value').then(function (snapshot) {
+                user_list.once('value').then(function (snapshot) {
                   snapshot.forEach(function (childSnapshot) {
                     var childData = childSnapshot.val();
                     if (childData.email == user_email) {
@@ -438,7 +438,6 @@ function HotMain({ navigation }: { navigation: any }) {
                   })
                 })
               }
-            })
             showModal(item)
           }
           }
