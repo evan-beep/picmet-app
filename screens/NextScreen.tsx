@@ -167,165 +167,166 @@ function HotMain({ navigation }: { navigation: any }) {
   }
 
   function sendMyComment() {
-      if (currUser) {
-        let user_email = currUser.email;
-        let comment_list = firebase.database().ref('comment_list');
-        comment_list.push({
-          user_email: user_email,
-          itemID: currItem.id,
-          content: myComment
-        }).then(async function (e) {
-          let comment_id = e.path.pieces_[1];
-          let user_list = firebase.database().ref('user_list');
-          await user_list.once('value').then(function (snapshot) {
+    if (currUser) {
+      let user_email = currUser.email;
+      let comment_list = firebase.database().ref('comment_list');
+      comment_list.push({
+        user_email: user_email,
+        itemID: currItem.id,
+        content: myComment,
+        name: currUser.displayName
+      }).then(async function (e) {
+        let comment_id = e.path.pieces_[1];
+        let user_list = firebase.database().ref('user_list');
+        await user_list.once('value').then(function (snapshot) {
+          snapshot.forEach(function (childSnapshot) {
+            var childData = childSnapshot.val();
+            if (childData.email == user_email) {
+              firebase.database().ref("user_list/" + childSnapshot.key + "/comment_list").push(comment_id)
+            }
+          })
+        })
+        firebase.database().ref('item_list/' + currItem.id + "/comment_list").push(comment_id);
+        firebase.database().ref('item_list/' + currItem.id + "/commentNum").get().then(function (e) {
+          firebase.database().ref('item_list/' + currItem.id + "/commentNum").set(e.val() + 1);
+        })
+      }).then(function () {
+        setMyComment("");
+      })
+    }
+    else {
+      Alert.alert("錯誤", "請先登入才可使用此功能");
+      setMyComment("");
+    }
+  }
+
+  function itemLike() {
+    if (currUser) {
+      let user_email = currUser.email;
+      let user_list = firebase.database().ref("user_list");
+      let like_userlist = firebase.database().ref("item_list/" + currItem.id + "/like_userlist");
+      if (likeOrDis === 'Like') {
+        like_userlist.once('value').then(function (snapshot) {
+          snapshot.forEach(function (childSnapshot) {
+            let email = childSnapshot.val().email;
+            if (email == user_email)
+              firebase.database().ref('item_list/' + currItem.id + "/like_userlist/" + childSnapshot.key).remove();
+          })
+        }).then(function () {
+          user_list.once('value').then(function (snapshot) {
             snapshot.forEach(function (childSnapshot) {
               var childData = childSnapshot.val();
               if (childData.email == user_email) {
-                firebase.database().ref("user_list/" + childSnapshot.key + "/comment_list").push(comment_id)
+                let user_liked_list = firebase.database().ref('user_list/' + childSnapshot.key + "/liked_list");
+                user_liked_list.once('value').then(function (s) {
+                  s.forEach(function (c) {
+                    let itemID = c.val().itemID;
+                    if (itemID == currItem.id) {
+                      firebase.database().ref('user_list/' + childSnapshot.key + "/liked_list/" + c.key).remove();
+                    }
+                  })
+                }).then(function () {
+                  firebase.database().ref("item_list/" + currItem.id + "/likeNum").get().then(function (e) {
+                    firebase.database().ref("item_list/" + currItem.id + "/likeNum").set(e.val() - 1);
+                  });
+                  setLikeOrDis("None")
+                })
               }
             })
           })
-          firebase.database().ref('item_list/' + currItem.id + "/comment_list").push(comment_id);
-          firebase.database().ref('item_list/' + currItem.id + "/commentNum").get().then(function (e) {
-            firebase.database().ref('item_list/' + currItem.id + "/commentNum").set(e.val() + 1);
-          })
-        }).then(function () {
-          setMyComment("");
         })
       }
-      else {
-        Alert.alert("錯誤", "請先登入才可使用此功能");
-        setMyComment("");
-      }
-    }
-
-  function itemLike() {
-      if (currUser) {
-        let user_email = currUser.email;
-        let user_list = firebase.database().ref("user_list");
-        let like_userlist = firebase.database().ref("item_list/" + currItem.id + "/like_userlist");
-        if(likeOrDis === 'Like'){
-          like_userlist.once('value').then(function (snapshot) {
+      if (likeOrDis === 'None') {
+        like_userlist.push({
+          email: user_email
+        }).then(function () {
+          user_list.once('value').then(function (snapshot) {
             snapshot.forEach(function (childSnapshot) {
-              let email = childSnapshot.val().email;
-              if (email == user_email)
-                firebase.database().ref('item_list/' + currItem.id + "/like_userlist/" + childSnapshot.key).remove();
-            })
-          }).then(function(){
-            user_list.once('value').then(function (snapshot) {
-              snapshot.forEach(function (childSnapshot) {
-                var childData = childSnapshot.val();
-                if (childData.email == user_email) {
-                  let user_liked_list = firebase.database().ref('user_list/' + childSnapshot.key + "/liked_list");
-                  user_liked_list.once('value').then(function (s) {
-                    s.forEach(function (c) {
-                      let itemID = c.val().itemID;
-                      if (itemID == currItem.id) {
-                        firebase.database().ref('user_list/' + childSnapshot.key + "/liked_list/" + c.key).remove();
-                      }
-                    })
-                  }).then(function(){
-                    firebase.database().ref("item_list/" + currItem.id + "/likeNum").get().then(function (e) {
-                      firebase.database().ref("item_list/" + currItem.id + "/likeNum").set(e.val() - 1);
-                    });
-                    setLikeOrDis("None")
-                  })
-                }
-              })
+              var childData = childSnapshot.val();
+              if (childData.email == user_email) {
+                let user_liked_list = firebase.database().ref('user_list/' + childSnapshot.key + "/liked_list");
+                user_liked_list.push({
+                  itemID: currItem.id
+                })
+              }
             })
           })
-        }
-        if(likeOrDis === 'None'){
-          like_userlist.push({
-            email: user_email
-          }).then(function(){
-            user_list.once('value').then(function (snapshot) {
-              snapshot.forEach(function (childSnapshot) {
-                var childData = childSnapshot.val();
-                if (childData.email == user_email) {
-                  let user_liked_list = firebase.database().ref('user_list/' + childSnapshot.key + "/liked_list");
-                  user_liked_list.push({
-                    itemID: currItem.id
-                  })
-                }
-              })
-            })
-          }).then(function(){
-            firebase.database().ref("item_list/" + currItem.id + "/likeNum").get().then(function (e) {
-              firebase.database().ref("item_list/" + currItem.id + "/likeNum").set(e.val() + 1);
-            });
-            setLikeOrDis("Like")
-          })
-        }
-      }
-      else {
-        Alert.alert("錯誤", "請先登入才可使用此功能");
+        }).then(function () {
+          firebase.database().ref("item_list/" + currItem.id + "/likeNum").get().then(function (e) {
+            firebase.database().ref("item_list/" + currItem.id + "/likeNum").set(e.val() + 1);
+          });
+          setLikeOrDis("Like")
+        })
       }
     }
+    else {
+      Alert.alert("錯誤", "請先登入才可使用此功能");
+    }
+  }
 
   function itemDislike() {
-      if (currUser) {
-        let user_email = currUser.email;
-        let user_list = firebase.database().ref("user_list");
-        let dislike_userlist = firebase.database().ref("item_list/" + currItem.id + "/dislike_userlist");
-        if(likeOrDis === 'Dislike'){
-          dislike_userlist.once('value').then(function (snapshot) {
+    if (currUser) {
+      let user_email = currUser.email;
+      let user_list = firebase.database().ref("user_list");
+      let dislike_userlist = firebase.database().ref("item_list/" + currItem.id + "/dislike_userlist");
+      if (likeOrDis === 'Dislike') {
+        dislike_userlist.once('value').then(function (snapshot) {
+          snapshot.forEach(function (childSnapshot) {
+            let email = childSnapshot.val().email;
+            if (email == user_email)
+              firebase.database().ref('item_list/' + currItem.id + "/dislike_userlist/" + childSnapshot.key).remove();
+          })
+        }).then(function () {
+          user_list.once('value').then(function (snapshot) {
             snapshot.forEach(function (childSnapshot) {
-              let email = childSnapshot.val().email;
-              if (email == user_email)
-                firebase.database().ref('item_list/' + currItem.id + "/dislike_userlist/" + childSnapshot.key).remove();
-            })
-          }).then(function(){
-            user_list.once('value').then(function (snapshot) {
-              snapshot.forEach(function (childSnapshot) {
-                var childData = childSnapshot.val();
-                if (childData.email == user_email) {
-                  let user_disliked_list = firebase.database().ref('user_list/' + childSnapshot.key + "/disliked_list");
-                  user_disliked_list.once('value').then(function (s) {
-                    s.forEach(function (c) {
-                      let itemID = c.val().itemID;
-                      if (itemID == currItem.id) {
-                        firebase.database().ref('user_list/' + childSnapshot.key + "/disliked_list/" + c.key).remove();
-                      }
-                    })
-                  }).then(function(){
-                    firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").get().then(function (e) {
-                      firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").set(e.val() - 1);
-                    });
-                    setLikeOrDis("None")
+              var childData = childSnapshot.val();
+              if (childData.email == user_email) {
+                let user_disliked_list = firebase.database().ref('user_list/' + childSnapshot.key + "/disliked_list");
+                user_disliked_list.once('value').then(function (s) {
+                  s.forEach(function (c) {
+                    let itemID = c.val().itemID;
+                    if (itemID == currItem.id) {
+                      firebase.database().ref('user_list/' + childSnapshot.key + "/disliked_list/" + c.key).remove();
+                    }
                   })
-                }
-              })
+                }).then(function () {
+                  firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").get().then(function (e) {
+                    firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").set(e.val() - 1);
+                  });
+                  setLikeOrDis("None")
+                })
+              }
             })
           })
-        }
-        if(likeOrDis === 'None'){
-          dislike_userlist.push({
-            email: user_email
-          }).then(function(){
-            user_list.once('value').then(function (snapshot) {
-              snapshot.forEach(function (childSnapshot) {
-                var childData = childSnapshot.val();
-                if (childData.email == user_email) {
-                  let user_disliked_list = firebase.database().ref('user_list/' + childSnapshot.key + "/disliked_list");
-                  user_disliked_list.push({
-                    itemID: currItem.id
-                  })
-                }
-              })
-            })
-          }).then(function(){
-            firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").get().then(function (e) {
-              firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").set(e.val() + 1);
-            });
-            setLikeOrDis("Dislike")
-          })
-        }
+        })
       }
-      else {
-        Alert.alert("錯誤", "請先登入才可使用此功能");
+      if (likeOrDis === 'None') {
+        dislike_userlist.push({
+          email: user_email
+        }).then(function () {
+          user_list.once('value').then(function (snapshot) {
+            snapshot.forEach(function (childSnapshot) {
+              var childData = childSnapshot.val();
+              if (childData.email == user_email) {
+                let user_disliked_list = firebase.database().ref('user_list/' + childSnapshot.key + "/disliked_list");
+                user_disliked_list.push({
+                  itemID: currItem.id
+                })
+              }
+            })
+          })
+        }).then(function () {
+          firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").get().then(function (e) {
+            firebase.database().ref("item_list/" + currItem.id + "/dislikeNum").set(e.val() + 1);
+          });
+          setLikeOrDis("Dislike")
+        })
       }
     }
+    else {
+      Alert.alert("錯誤", "請先登入才可使用此功能");
+    }
+  }
 
   function getItem() {
     firebase.database().ref("item_list").once('value').then(
@@ -343,43 +344,43 @@ function HotMain({ navigation }: { navigation: any }) {
   }
 
   function addToFavourite() {
-      if (currUser) {
-        let user_email = currUser.email;
-        let user_list = firebase.database().ref('user_list');
-        user_list.once('value').then(function (snapshot) {
-          snapshot.forEach(function (childSnapshot) {
-            var childData = childSnapshot.val();
-            if (childData.email == user_email) {
-              let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
-              user_favorite_list.once('value').then(function (s) {
-                s.forEach(function (c) {
-                  let itemID = c.val().itemID;
-                  if (itemID == currItem.id) {
-                    firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list/" + c.key).remove();
-                  }
-                })
-              }).then(function () {
-                if(!is_favorite){
-                  user_favorite_list.push({
-                    itemID: currItem.id
-                  })
-                  setIs_favorite(true);
-                  Alert.alert("添加成功", "成功添加至我的最愛");
-                }
-                else{
-                  setIs_favorite(false);
-                  Alert.alert("刪除成功", "成功從我的最愛中刪除");
+    if (currUser) {
+      let user_email = currUser.email;
+      let user_list = firebase.database().ref('user_list');
+      user_list.once('value').then(function (snapshot) {
+        snapshot.forEach(function (childSnapshot) {
+          var childData = childSnapshot.val();
+          if (childData.email == user_email) {
+            let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
+            user_favorite_list.once('value').then(function (s) {
+              s.forEach(function (c) {
+                let itemID = c.val().itemID;
+                if (itemID == currItem.id) {
+                  firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list/" + c.key).remove();
                 }
               })
-            }
-          })
+            }).then(function () {
+              if (!is_favorite) {
+                user_favorite_list.push({
+                  itemID: currItem.id
+                })
+                setIs_favorite(true);
+                Alert.alert("添加成功", "成功添加至我的最愛");
+              }
+              else {
+                setIs_favorite(false);
+                Alert.alert("刪除成功", "成功從我的最愛中刪除");
+              }
+            })
+          }
         })
+      })
 
-      }
-      else {
-        Alert.alert("添加失敗", "請先等入才可添加商品至最愛！");
-      }
     }
+    else {
+      Alert.alert("添加失敗", "請先等入才可添加商品至最愛！");
+    }
+  }
 
   const renderItem = (item: any) => {
     return (
@@ -387,57 +388,57 @@ function HotMain({ navigation }: { navigation: any }) {
         ?
         <TouchableOpacity
           onPress={() => {
-              if (currUser) {
-                let user_email = currUser.email;
-                let user_list = firebase.database().ref('user_list');
-                user_list.once('value').then(function (snapshot) {
-                  snapshot.forEach(function (childSnapshot) {
-                    var childData = childSnapshot.val();
-                    if (childData.email == user_email) {
-                      let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
-                      let user_liked_list = firebase.database().ref('user_list/' + childSnapshot.key + '/liked_list');
-                      let user_disliked_list = firebase.database().ref('user_list/' + childSnapshot.key + '/disliked_list');
-                      user_favorite_list.once('value').then(function (s) {
-                        s.forEach(function (c) {
-                          let itemID = c.val().itemID;
-                          if (itemID == item.item.id) {
-                            setIs_favorite(true);
-                          }
-                        })
+            if (currUser) {
+              let user_email = currUser.email;
+              let user_list = firebase.database().ref('user_list');
+              user_list.once('value').then(function (snapshot) {
+                snapshot.forEach(function (childSnapshot) {
+                  var childData = childSnapshot.val();
+                  if (childData.email == user_email) {
+                    let user_favorite_list = firebase.database().ref('user_list/' + childSnapshot.key + "/favorite_list");
+                    let user_liked_list = firebase.database().ref('user_list/' + childSnapshot.key + '/liked_list');
+                    let user_disliked_list = firebase.database().ref('user_list/' + childSnapshot.key + '/disliked_list');
+                    user_favorite_list.once('value').then(function (s) {
+                      s.forEach(function (c) {
+                        let itemID = c.val().itemID;
+                        if (itemID == item.item.id) {
+                          setIs_favorite(true);
+                        }
                       })
-                      user_liked_list.once('value').then(function (s) {
-                        s.forEach(function (c) {
-                          let itemID = c.val().itemID;
-                          if (itemID == item.item.id) {
-                            setLikeOrDis("Like");
-                          }
-                        })
+                    })
+                    user_liked_list.once('value').then(function (s) {
+                      s.forEach(function (c) {
+                        let itemID = c.val().itemID;
+                        if (itemID == item.item.id) {
+                          setLikeOrDis("Like");
+                        }
                       })
-                      user_disliked_list.once('value').then(function (s) {
-                        s.forEach(function (c) {
-                          let itemID = c.val().itemID;
-                          if (itemID == item.item.id) {
-                            setLikeOrDis("Dislike");
-                          }
-                        })
+                    })
+                    user_disliked_list.once('value').then(function (s) {
+                      s.forEach(function (c) {
+                        let itemID = c.val().itemID;
+                        if (itemID == item.item.id) {
+                          setLikeOrDis("Dislike");
+                        }
                       })
-                      let user_history_list = firebase.database().ref('user_list/' + childSnapshot.key + "/history_list");
-                      user_history_list.once('value').then(function (s) {
-                        s.forEach(function (c) {
-                          let itemID = c.val().itemID;
-                          if (itemID == item.item.id) {
-                            firebase.database().ref('user_list/' + childSnapshot.key + "/history_list/" + c.key).remove();
-                          }
-                        })
-                      }).then(function () {
-                        user_history_list.push({
-                          itemID: item.item.id
-                        })
+                    })
+                    let user_history_list = firebase.database().ref('user_list/' + childSnapshot.key + "/history_list");
+                    user_history_list.once('value').then(function (s) {
+                      s.forEach(function (c) {
+                        let itemID = c.val().itemID;
+                        if (itemID == item.item.id) {
+                          firebase.database().ref('user_list/' + childSnapshot.key + "/history_list/" + c.key).remove();
+                        }
                       })
-                    }
-                  })
+                    }).then(function () {
+                      user_history_list.push({
+                        itemID: item.item.id
+                      })
+                    })
+                  }
                 })
-              }
+              })
+            }
             showModal(item)
           }
           }
@@ -564,7 +565,7 @@ function HotMain({ navigation }: { navigation: any }) {
           <View style={{ minHeight: 80, width: '90%', backgroundColor: '#00C7DC', borderRadius: 10, alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ height: 30, width: '90%', marginTop: 10 }}>
               <Text style={{ fontSize: 18, color: 'white', fontWeight: '500' }}>
-                {item.item.userID} 說：
+                {item.item.name} 說：
               </Text>
             </View>
             <View style={{ width: '90%' }}>

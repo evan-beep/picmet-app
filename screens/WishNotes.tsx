@@ -37,60 +37,63 @@ export default function WishNotes({ navigation }: { navigation: any }) {
   const [currUser, setCurrUser] = useState<any>(null);
 
   const firebaseUser = firebase.auth().currentUser;
-
   useEffect(() => {
     if (firebaseUser) {
       setCurrUser(firebaseUser);
+    } else {
+      setCurrUser('noUser');
     }
-
   }, []);
 
   const [wishnote, setWishnote] = useState(initWish);
+
   useEffect(() => {
-      if (currUser) {
-        let user_email = currUser.email;
-        let user_list = firebase.database().ref('user_list');
-        user_list.once('value').then(function (snapshot) {
-          snapshot.forEach(function (childSnapshot) {
-            var childData = childSnapshot.val();
-            if (childData.email == user_email) {
-              let user_wish_list = firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list");
-              user_wish_list.once('value').then(function (s) {
-                s.forEach(function (c) {
-                  let wish_string = c.val();
-                  setWishnote(wish_string);
-                })
+    if (currUser && currUser != 'noUser') {
+      let user_email = currUser.email;
+      let user_list = firebase.database().ref('user_list');
+      user_list.once('value').then(function (snapshot) {
+        snapshot.forEach(function (childSnapshot) {
+          var childData = childSnapshot.val();
+          if (childData.email == user_email) {
+            let user_wish_list = firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list");
+            user_wish_list.once('value').then(function (s) {
+              s.forEach(function (c) {
+                let wish_string = c.val();
+                setWishnote(wish_string);
               })
-            }
-          })
+            })
+          }
         })
-      }
-      else{
-        Alert.alert("錯誤","請先登入才可使用此功能");
-        navigation.navigate("Login");
-      }
-  }, [])
-  function saveWishNote() {
-      if (currUser) {
-        let user_email = currUser.email;
-        let user_list = firebase.database().ref('user_list');
-        user_list.once('value').then(function (snapshot) {
-          snapshot.forEach(function (childSnapshot) {
-            var childData = childSnapshot.val();
-            if (childData.email == user_email) {
-              firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list").remove();
-              firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list").push(
-                wishnote
-              )
-            }
-          })
-        })
-        Alert.alert("儲存成功", "已更新願望小清單！");
-      }
-      else {
-        Alert.alert("儲存失敗", "請先登入才可添加願望小清單！");
-      }
+      })
     }
+    else if (currUser == 'noUser') {
+      Alert.alert("錯誤", "請先登入才可使用此功能");
+      navigation.navigate("Login");
+    }
+  }, [currUser])
+
+  function saveWishNote() {
+    if (currUser && currUser != 'noUser') {
+      let user_email = currUser.email;
+      let user_list = firebase.database().ref('user_list');
+      user_list.once('value').then(function (snapshot) {
+        snapshot.forEach(function (childSnapshot) {
+          var childData = childSnapshot.val();
+          if (childData.email == user_email) {
+            firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list").remove();
+            firebase.database().ref('user_list/' + childSnapshot.key + "/wish_list").push(
+              wishnote
+            )
+          }
+        })
+      })
+      Alert.alert("儲存成功", "已更新願望小清單！");
+      navigation.openDrawer();
+    }
+    else {
+      Alert.alert("儲存失敗", "請先登入才可添加願望小清單！");
+    }
+  }
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', backgroundColor: '#B184CF' }}>
@@ -112,7 +115,7 @@ export default function WishNotes({ navigation }: { navigation: any }) {
 
         <TouchableOpacity onPress={saveWishNote} style={{ width: 300, height: 300, borderRadius: 200, backgroundColor: '#7CAEDE', position: 'absolute', bottom: -150, alignItems: 'center' }}>
           <Text style={{ fontSize: 30, color: 'white', marginTop: 80, fontWeight: '600' }}>
-            Save
+            儲存
           </Text>
         </TouchableOpacity>
       </View>

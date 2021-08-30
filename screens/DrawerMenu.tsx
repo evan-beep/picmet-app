@@ -172,7 +172,7 @@ export function DrawerMenu(props: any) {
               fontWeight: '600',
               padding: 0
             }}>
-              登出
+              {currUser ? '登出' : '登入頁面'}
             </Text>
           )}
           onPress={() => {
