@@ -36,7 +36,7 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
   function login(e: string, p: string) {
     firebase.auth().signInWithEmailAndPassword(e, p)
       .then(function () {
-        navigation.navigate('Main');
+        navigation.push('Main');
       })
       .catch(function (error) {
         // Handle Errors here.
@@ -57,7 +57,7 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.push('Home')}>
           <Image
             style={[styles.backButton, { resizeMode: 'contain' }]}
             source={require('../assets/backarrow.png')} />

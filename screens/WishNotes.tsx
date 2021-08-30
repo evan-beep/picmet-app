@@ -68,7 +68,7 @@ export default function WishNotes({ navigation }: { navigation: any }) {
     }
     else if (currUser == 'noUser') {
       Alert.alert("錯誤", "請先登入才可使用此功能");
-      navigation.navigate("Login");
+      navigation.push("Login");
     }
   }, [currUser])
 

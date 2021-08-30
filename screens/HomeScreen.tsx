@@ -20,17 +20,17 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           source={require('../assets/slogan.png')} />
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={() => navigation.push('Login')}>
           <Image
             style={styles.button}
             source={require('../assets/loginButton.png')} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+        <TouchableOpacity onPress={() => navigation.push('Register')}>
           <Image
             style={styles.button}
             source={require('../assets/registerButton.png')} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+        <TouchableOpacity onPress={() => navigation.push('Main')}>
           <Image
             style={styles.button}
             source={require('../assets/noAccountButton.png')} />

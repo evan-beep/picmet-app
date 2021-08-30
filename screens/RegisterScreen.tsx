@@ -94,7 +94,7 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
         result.user.updateProfile({
           displayName: u
         })
-        navigation.navigate('Main');
+        navigation.push('Main');
       })
       .catch(function (error) {
         var errorMessage = error.message;
@@ -116,7 +116,7 @@ export default function RegisterScreen({ navigation }: { navigation: any }) {
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.push('Home')}>
           <Image
             style={[styles.backButton, { resizeMode: 'contain' }]}
             source={require('../assets/backarrow.png')} />

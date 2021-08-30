@@ -5,7 +5,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Start Screen</Text>
-      <Button title="Nxt page" onPress={() => navigation.navigate('Home')}></Button>
+      <Button title="Nxt page" onPress={() => navigation.push('Home')}></Button>
     </View>
   )
 }
